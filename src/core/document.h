@@ -68,6 +68,8 @@ bool document_string_list(const document_node *table, const char *key, string_li
 bool document_check_keys(const document_node *table, const char *const *allowed, size_t allowed_count,
                          error_list *errors);
 
+document_node *document_parse_toml(const char *text, const char *file, error_list *errors);
+
 const char *document_skip_byte_order_mark(const char *text);
 
 #endif
