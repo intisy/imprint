@@ -16,3 +16,5 @@ if readelf --dynamic build/musl/src/engine/imprint-engine | grep -q NEEDED; then
     echo "imprint-engine links shared libraries, it must be static" >&2
     exit 1
 fi
+
+python3 -m unittest discover --start-directory tools/convert
