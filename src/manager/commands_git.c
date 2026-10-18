@@ -137,17 +137,28 @@ static bool is_git_url(const char *text) {
     return strncmp(text, "git@", 4) == 0 && text[4] != '-';
 }
 
-/** @implNote The reference is split at an @ after the last slash, so the @ in git@host:owner/repo stays in the URL. */
+static bool is_url_form(const char *source) {
+    return strstr(source, "://") != NULL || strncmp(source, "git@", 4) == 0;
+}
+
+/**
+ * @implNote A URL is split at an @ after its last slash, so the @ in git@host:owner/repo stays in the URL. The
+ * owner/repo short form is split at the first @ after its first slash, so a reference may contain slashes.
+ */
+static const char *reference_separator(const char *source) {
+    const char *anchor = is_url_form(source) ? strrchr(source, '/') : strchr(source, '/');
+    return anchor == NULL ? NULL : strchr(anchor, '@');
+}
+
 static bool parse_data_source(const char *source, data_source *parsed) {
-    const char *last_slash = strrchr(source, '/');
-    const char *at = last_slash == NULL ? NULL : strchr(last_slash, '@');
+    const char *at = reference_separator(source);
     size_t location_length = at == NULL ? strlen(source) : (size_t)(at - source);
     char *location = memory_allocate(location_length + 1);
     memcpy(location, source, location_length);
     location[location_length] = '\0';
     parsed->reference = text_duplicate(at == NULL ? REMOTE_DEFAULT_BRANCH : at + 1);
     bool valid = is_reference(parsed->reference);
-    if (strstr(location, "://") != NULL || strncmp(location, "git@", 4) == 0) {
+    if (is_url_form(location)) {
         parsed->url = location;
         return valid && is_git_url(location);
     }

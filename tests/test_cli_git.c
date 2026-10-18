@@ -104,6 +104,19 @@ UTEST(cli_git, a_reference_after_the_at_sign_is_fetched) {
     string_list_free(&fake.commands);
 }
 
+UTEST(cli_git, a_reference_with_a_slash_is_fetched) {
+    const char *const outputs[] = { "git version 2.47.0\n", "" };
+    fake_git fake = fake_with(outputs, COUNT_OF(outputs), SIZE_MAX);
+    const char *const arguments[] = { "imprint", "--root", ROOT, "data", "use", "intisy/imprint-data@feature/x" };
+    cli_result result = run(arguments, COUNT_OF(arguments), &fake);
+    ASSERT_EQ(IMPRINT_EXIT_OK, result.exit_code);
+    ASSERT_STREQ("git -C " ROOT " config submodule.data.url https://github.com/intisy/imprint-data.git",
+                 fake.commands.items[2]);
+    ASSERT_STREQ("git -C " ROOT "/data fetch -q origin feature/x", fake.commands.items[4]);
+    cli_result_free(&result);
+    string_list_free(&fake.commands);
+}
+
 UTEST(cli_git, without_a_source_the_template_comes_back) {
     const char *const outputs[] = { "git version 2.47.0\n", "https://github.com/intisy/imprint-data-template.git\n", "" };
     fake_git fake = fake_with(outputs, COUNT_OF(outputs), SIZE_MAX);
@@ -171,6 +184,14 @@ UTEST(cli_git, a_source_with_a_dot_leading_part_is_refused) {
 
 UTEST(cli_git, a_reference_starting_with_a_dash_is_refused) {
     ASSERT_SOURCE_REFUSED("owner/repo@--upload-pack=x");
+}
+
+UTEST(cli_git, a_slash_reference_does_not_hide_a_second_slash_in_the_location) {
+    ASSERT_SOURCE_REFUSED("owner/repo/extra@feature/x");
+}
+
+UTEST(cli_git, a_slash_reference_starting_with_a_dash_is_refused) {
+    ASSERT_SOURCE_REFUSED("owner/repo@-x/y");
 }
 
 UTEST(cli_git, a_failing_fetch_stops_with_exit_3) {
