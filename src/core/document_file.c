@@ -1,5 +1,6 @@
 #include "document.h"
 
+#include "platform.h"
 #include "text.h"
 
 #include <errno.h>
@@ -7,33 +8,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-static char *read_stream(FILE *stream) {
-    size_t capacity = 4096;
-    size_t length = 0;
-    char *buffer = memory_allocate(capacity);
-    size_t read = 0;
-    while ((read = fread(buffer + length, 1, capacity - length - 1, stream)) > 0) {
-        length += read;
-        if (length + 1 == capacity) {
-            capacity *= 2;
-            buffer = memory_reallocate(buffer, capacity);
-        }
-    }
-    if (ferror(stream) != 0) {
-        free(buffer);
-        return NULL;
-    }
-    buffer[length] = '\0';
-    return buffer;
-}
-
 bool file_read_all(const char *path, char **text, error_list *errors) {
     FILE *stream = fopen(path, "rb");
     if (stream == NULL) {
         error_push(errors, path, 0, "cannot read: %s", strerror(errno));
         return false;
     }
-    char *buffer = read_stream(stream);
+    char *buffer = platform_read_stream(stream);
     fclose(stream);
     if (buffer == NULL) {
         error_push(errors, path, 0, "cannot read: the read failed");

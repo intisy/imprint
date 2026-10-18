@@ -7,12 +7,17 @@ set(IMPRINT_TEST_SOURCES
     test_document_toml.c
     test_document_json.c
     test_identifier.c
+    test_platform.c
 )
 
 add_executable(imprint-tests ${IMPRINT_TEST_SOURCES})
 target_link_libraries(imprint-tests PRIVATE imprint_core imprint_utest imprint_warnings)
 # Under wine a path starting with / resolves on drive Z:, which wine maps to the Linux root.
 target_compile_definitions(imprint-tests PRIVATE IMPRINT_TEST_FIXTURES="${CMAKE_CURRENT_SOURCE_DIR}/fixtures")
+add_executable(argument_echo argument_echo.c)
+target_link_libraries(argument_echo PRIVATE imprint_warnings)
+add_dependencies(imprint-tests argument_echo)
+target_compile_definitions(imprint-tests PRIVATE IMPRINT_TEST_ARGUMENT_ECHO="$<TARGET_FILE:argument_echo>")
 add_test(NAME unit COMMAND imprint-tests)
 
 add_test(NAME manager_version COMMAND imprint --version)
