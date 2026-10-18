@@ -120,7 +120,11 @@ static bool is_owner_and_repository(const char *location) {
            is_name_text(location, (size_t)(slash - location), "-") && is_name_text(slash + 1, strlen(slash + 1), "-_.");
 }
 
-/** @implNote A - at the start, or right after the scheme or git@, would be read by git or ssh as an option; only these two forms name a remote. */
+/**
+ * @implNote Git accepts more forms than these two (local paths, other host:path spellings); imprint allows only
+ * scheme:// URLs and git@host: because it must refuse a - at the start, or right after the scheme or git@, which
+ * git or ssh would read as an option.
+ */
 static bool is_git_url(const char *text) {
     if (text[0] == '-' || text[0] == '\0') {
         return false;
