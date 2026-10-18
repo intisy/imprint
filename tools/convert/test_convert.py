@@ -112,6 +112,22 @@ class ConvertTest(unittest.TestCase):
             "remote": {"ssh_authorized_keys": ["ssh-ed25519 AAAA test"], "tailscale": True},
         })
 
+    def test_no_remote_adds_neither_ssh_nor_tailscale(self):
+        self.assertEqual(convert.convert_setup({"apps": ["git"]})["apps"], ["git"])
+
+    def test_empty_ssh_keys_add_no_ssh(self):
+        setup = convert.convert_setup({"apps": ["git"], "remote": {"ssh_authorized_keys": []}})
+        self.assertEqual(setup["apps"], ["git"])
+
+    def test_tailscale_false_adds_no_tailscale(self):
+        setup = convert.convert_setup({"apps": ["git"], "remote": {"tailscale": False}})
+        self.assertEqual(setup["apps"], ["git"])
+
+    def test_keys_and_tailscale_add_both_exactly_once(self):
+        remote = {"ssh_authorized_keys": ["ssh-ed25519 AAAA test"], "tailscale": True}
+        setup = convert.convert_setup({"apps": ["git", "ssh"], "remote": remote})
+        self.assertEqual(setup["apps"], ["git", "ssh", "tailscale"])
+
     def test_a_host_file_from_compose_docs_names_its_repository(self):
         setup = convert.convert_setup({"host_files": [{
             "source": "F:/Documents/GitHub/compose/docs/tools/drive-sync", "target": "~/.local/share/drive-sync"}]})
@@ -145,7 +161,11 @@ class RealTreeTest(unittest.TestCase):
         self.assertEqual(conversion.setups["workstation"]["extends"], "base")
         self.assertIn("jetbrains-toolbox", conversion.setups["workstation"]["apps"])
         self.assertIn("visual-studio-code", conversion.setups["base"]["apps"])
-        self.assertIn("tailscale", conversion.setups["storage-worker"]["apps"])
+        for name in ("workstation", "storage-worker"):
+            for remote_app in ("ssh", "tailscale"):
+                self.assertIn(remote_app, conversion.setups[name]["apps"])
+        for remote_app in ("ssh", "tailscale"):
+            self.assertNotIn(remote_app, conversion.setups["base"]["apps"])
         for setup in list(conversion.setups.values()) + list(conversion.template_setups.values()):
             tomllib.loads(toml_writer.dumps(setup))
 
