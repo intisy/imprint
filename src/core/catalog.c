@@ -84,8 +84,7 @@ static bool check_identity(const document_node *node, const char *path, const ch
     if (!document_require_string(node, "id", &id, errors)) {
         return false;
     }
-    if (!identifier_is_valid(id)) {
-        document_error(errors, document_get(node, "id"), "'%s' is not a valid id: %s", id, IDENTIFIER_RULE);
+    if (!catalog_check_identifier(document_get(node, "id"), errors)) {
         return false;
     }
     if (strcmp(id, stem) != 0) {

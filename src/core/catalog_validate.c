@@ -6,6 +6,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+bool catalog_check_identifier(const document_node *string_node, error_list *errors) {
+    if (identifier_is_valid(string_node->string_value)) {
+        return true;
+    }
+    document_error(errors, string_node, "'%s' is not a valid id: %s", string_node->string_value, IDENTIFIER_RULE);
+    return false;
+}
+
 static const char *const APP_KEYS[] = { "id", "name", "category", "tags", "install", "services", "config", "config_files" };
 static const char *const RECIPE_KEYS[] = { "packages", "aur", "flatpak", "repo_setup", "services" };
 static const char *const DISTRO_KEYS[] = { "id", "name", "package_manager", "extra_sources", "persistence_label",
@@ -34,11 +42,7 @@ static bool check_identifier_list(const document_node *table, const char *key, e
     const document_node *list = document_get(table, key);
     bool valid = true;
     for (size_t index = 0; list != NULL && index < list->child_count; index++) {
-        if (!identifier_is_valid(list->children[index]->string_value)) {
-            document_error(errors, list->children[index], "'%s' is not a valid id: %s",
-                           list->children[index]->string_value, IDENTIFIER_RULE);
-            valid = false;
-        }
+        valid = catalog_check_identifier(list->children[index], errors) && valid;
     }
     return valid;
 }
@@ -141,9 +145,8 @@ static bool check_variants(const document_node *entry, error_list *errors) {
         valid = document_check_keys(variant, VARIANT_KEYS, COUNT_OF(VARIANT_KEYS), errors) && valid;
         valid = document_require_string(variant, "name", &text, errors) && valid;
         valid = check_string_list(variant, "iso_match", errors) && valid;
-        if (document_require_string(variant, "id", &text, errors) && !identifier_is_valid(text)) {
-            document_error(errors, document_get(variant, "id"), "'%s' is not a valid id: %s", text, IDENTIFIER_RULE);
-            valid = false;
+        if (document_require_string(variant, "id", &text, errors)) {
+            valid = catalog_check_identifier(document_get(variant, "id"), errors) && valid;
         }
     }
     return valid;
