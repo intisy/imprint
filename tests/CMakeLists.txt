@@ -3,6 +3,7 @@ set(IMPRINT_TEST_SOURCES
     test_text.c
     test_error.c
     test_string_list.c
+    test_document.c
 )
 
 add_executable(imprint-tests ${IMPRINT_TEST_SOURCES})
