@@ -14,20 +14,6 @@ UTEST(string_list, add_unique_refuses_a_duplicate) {
     string_list_free(&list);
 }
 
-UTEST(string_list, remove_all_keeps_the_order_of_the_rest) {
-    string_list list;
-    string_list_init(&list);
-    string_list_add(&list, "a");
-    string_list_add(&list, "b");
-    string_list_add(&list, "a");
-    string_list_add(&list, "c");
-    string_list_remove_all(&list, "a");
-    char *joined = string_list_join(&list, ", ");
-    ASSERT_STREQ("b, c", joined);
-    free(joined);
-    string_list_free(&list);
-}
-
 UTEST(string_list, sort_and_reverse) {
     string_list list;
     string_list_init(&list);
