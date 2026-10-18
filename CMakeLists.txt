@@ -32,6 +32,7 @@ enable_testing()
 
 add_subdirectory(vendor)
 add_subdirectory(src/core)
+add_subdirectory(src/ui)
 add_subdirectory(src/engine)
 add_subdirectory(src/manager)
 add_subdirectory(tests)

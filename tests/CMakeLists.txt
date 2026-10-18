@@ -12,10 +12,11 @@ set(IMPRINT_TEST_SOURCES
     test_setup_merge.c
     test_setup.c
     test_resolve.c
+    test_ui.c
 )
 
 add_executable(imprint-tests ${IMPRINT_TEST_SOURCES})
-target_link_libraries(imprint-tests PRIVATE imprint_core imprint_utest imprint_warnings)
+target_link_libraries(imprint-tests PRIVATE imprint_core imprint_ui imprint_utest imprint_warnings)
 # Under wine a path starting with / resolves on drive Z:, which wine maps to the Linux root.
 target_compile_definitions(imprint-tests PRIVATE IMPRINT_TEST_FIXTURES="${CMAKE_CURRENT_SOURCE_DIR}/fixtures")
 add_executable(argument_echo argument_echo.c)
