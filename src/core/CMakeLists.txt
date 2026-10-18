@@ -8,6 +8,8 @@ add_library(imprint_core STATIC
     document_file.c
     identifier.c
     platform_common.c
+    catalog.c
+    catalog_validate.c
 )
 if(WIN32)
     target_sources(imprint_core PRIVATE platform_windows.c)

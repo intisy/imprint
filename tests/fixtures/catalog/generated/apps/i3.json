@@ -1,0 +1,1 @@
+{ "id": "i3", "name": "i3", "category": "desktop", "install": { "arch": { "packages": ["i3-wm", "i3status"] } } }

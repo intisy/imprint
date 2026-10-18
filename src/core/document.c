@@ -360,6 +360,9 @@ static bool is_allowed(const char *key, const char *const *allowed, size_t allow
 
 bool document_check_keys(const document_node *table, const char *const *allowed, size_t allowed_count,
                          error_list *errors) {
+    if (table == NULL) {
+        return true;
+    }
     bool valid = true;
     for (size_t index = 0; index < table->child_count; index++) {
         if (!is_allowed(table->children[index]->key, allowed, allowed_count)) {

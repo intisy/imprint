@@ -8,6 +8,7 @@ set(IMPRINT_TEST_SOURCES
     test_document_json.c
     test_identifier.c
     test_platform.c
+    test_catalog.c
 )
 
 add_executable(imprint-tests ${IMPRINT_TEST_SOURCES})

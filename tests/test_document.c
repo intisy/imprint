@@ -156,6 +156,15 @@ UTEST(document, check_keys_reports_each_unknown_key) {
     document_free(root);
 }
 
+UTEST(document, check_keys_accepts_an_absent_table) {
+    error_list errors;
+    error_list_init(&errors);
+    static const char *const allowed[] = { "distro" };
+    ASSERT_TRUE(document_check_keys(NULL, allowed, 1, &errors));
+    ASSERT_EQ((size_t)0, errors.count);
+    error_list_free(&errors);
+}
+
 UTEST(document, optional_getters_use_the_fallback_and_check_the_kind) {
     document_node *root = sample();
     error_list errors;
