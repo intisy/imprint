@@ -6,6 +6,7 @@ set(IMPRINT_TEST_SOURCES
     test_document.c
     test_document_toml.c
     test_document_json.c
+    test_identifier.c
 )
 
 add_executable(imprint-tests ${IMPRINT_TEST_SOURCES})
