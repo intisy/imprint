@@ -1,6 +1,8 @@
 #include "identifier.h"
 #include "utest.h"
 
+#include <string.h>
+
 UTEST(identifier, accepts_project_names) {
     ASSERT_TRUE(identifier_is_valid("steam"));
     ASSERT_TRUE(identifier_is_valid("visual-studio-code"));
@@ -38,4 +40,19 @@ UTEST(identifier, has_word_compares_whole_words) {
     ASSERT_TRUE(identifier_has_word("arch", "arch"));
     ASSERT_FALSE(identifier_has_word("archive", "arch"));
     ASSERT_FALSE(identifier_has_word("search-tool", "arch"));
+}
+
+UTEST(identifier, the_rules_state_digits_and_the_length_cap_the_checks_enforce) {
+    char name[66];
+    memset(name, 'a', 65);
+    name[65] = 0;
+    name[64] = 0;
+    ASSERT_TRUE(identifier_is_valid(name));
+    name[64] = 'a';
+    ASSERT_FALSE(identifier_is_valid(name));
+    ASSERT_TRUE(setup_name_is_valid("web2-server"));
+    ASSERT_FALSE(setup_name_is_valid("2web"));
+    ASSERT_TRUE(strstr(IDENTIFIER_RULE, "at most 64 characters") != NULL);
+    ASSERT_TRUE(strstr(SETUP_NAME_RULE, "letters and digits") != NULL);
+    ASSERT_TRUE(strstr(SETUP_NAME_RULE, "at most 64 characters") != NULL);
 }

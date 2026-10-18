@@ -3,12 +3,16 @@
 #include <stddef.h>
 #include <string.h>
 
-enum { IDENTIFIER_MAXIMUM_LENGTH = 64 };
+#define IDENTIFIER_MAXIMUM_LENGTH 64
+#define STRINGIFIED(value) STRINGIFIED_VALUE(value)
+#define STRINGIFIED_VALUE(value) #value
+#define MAXIMUM_LENGTH_TEXT STRINGIFIED(IDENTIFIER_MAXIMUM_LENGTH)
 
 const char *const IDENTIFIER_RULE =
-    "lowercase letters and digits in words joined by single hyphens, at most 64 characters";
+    "lowercase letters and digits in words joined by single hyphens, at most " MAXIMUM_LENGTH_TEXT " characters";
 const char *const SETUP_NAME_RULE =
-    "<purpose>[-<variant>]: one or two lowercase words joined by a hyphen, starting with a letter";
+    "<purpose>[-<variant>]: one or two words of lowercase letters and digits joined by a hyphen, starting with a "
+    "letter, at most " MAXIMUM_LENGTH_TEXT " characters";
 
 static bool is_word_character(char character) {
     return (character >= 'a' && character <= 'z') || (character >= '0' && character <= '9');
