@@ -268,6 +268,11 @@ char *resolved_setup_to_json(const resolved_setup *resolved) {
 }
 
 static bool read_format(const document_node *root, error_list *errors) {
+    const document_node *found = document_get(root, "format");
+    if (found == NULL) {
+        document_error(errors, root, "missing required key 'format'");
+        return false;
+    }
     long long format = 0;
     if (!document_optional_integer(root, "format", 0, &format, errors)) {
         return false;
@@ -280,13 +285,54 @@ static bool read_format(const document_node *root, error_list *errors) {
     return true;
 }
 
+static bool is_resolved_key(const char *key) {
+    if (strcmp(key, "format") == 0 || strcmp(key, "setup") == 0) {
+        return true;
+    }
+    for (size_t index = 0; index < COUNT_OF(TEXT_FIELDS); index++) {
+        if (strcmp(key, TEXT_FIELDS[index].key) == 0) {
+            return true;
+        }
+    }
+    for (size_t index = 0; index < COUNT_OF(LIST_FIELDS); index++) {
+        if (strcmp(key, LIST_FIELDS[index].key) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool refuse_unknown_keys(const document_node *root, error_list *errors) {
+    bool valid = true;
+    for (size_t index = 0; index < root->child_count; index++) {
+        if (!is_resolved_key(root->children[index]->key)) {
+            document_error(errors, root->children[index], "unknown key '%s' in a resolved setup", root->children[index]->key);
+            valid = false;
+        }
+    }
+    return valid;
+}
+
+static bool require_list(const document_node *root, const field_offset *field, string_list *values, error_list *errors) {
+    if (document_get(root, field->key) == NULL) {
+        document_error(errors, root, "missing required key '%s'", field->key);
+        return false;
+    }
+    return document_string_list(root, field->key, values, errors);
+}
+
 bool resolved_setup_from_json(const char *text, const char *file, resolved_setup *resolved, error_list *errors) {
     resolved_setup_init(resolved);
     document_node *root = document_parse_json(text, file, errors);
     if (root == NULL) {
         return false;
     }
-    bool valid = read_format(root, errors);
+    if (root->kind != DOCUMENT_TABLE) {
+        document_error(errors, root, "a resolved setup is a JSON object");
+        document_free(root);
+        return false;
+    }
+    bool valid = read_format(root, errors) && refuse_unknown_keys(root, errors);
     for (size_t index = 0; valid && index < COUNT_OF(TEXT_FIELDS); index++) {
         const char *value = NULL;
         if (document_require_string(root, TEXT_FIELDS[index].key, &value, errors)) {
@@ -296,7 +342,7 @@ bool resolved_setup_from_json(const char *text, const char *file, resolved_setup
         }
     }
     for (size_t index = 0; valid && index < COUNT_OF(LIST_FIELDS); index++) {
-        valid = document_string_list(root, LIST_FIELDS[index].key, list_at(resolved, &LIST_FIELDS[index]), errors);
+        valid = require_list(root, &LIST_FIELDS[index], list_at(resolved, &LIST_FIELDS[index]), errors);
     }
     const document_node *setup_table = NULL;
     if (valid && document_optional_table(root, "setup", &setup_table, errors) && setup_table != NULL) {

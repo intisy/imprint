@@ -1,6 +1,7 @@
 #include "resolve.h"
 #include "utest.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -124,4 +125,48 @@ UTEST(resolve, json_from_another_format_is_refused) {
     resolved_setup_free(&resolved);
     ASSERT_TRUE(error_list_mentions(&errors, "format 99 is not 1"));
     error_list_free(&errors);
+}
+
+static bool is_refused_with(const char *json, const char *message) {
+    resolved_setup resolved;
+    error_list errors;
+    error_list_init(&errors);
+    bool refused = !resolved_setup_from_json(json, "hand-over.json", &resolved, &errors);
+    bool mentioned = error_list_mentions(&errors, message);
+    resolved_setup_free(&resolved);
+    error_list_free(&errors);
+    return refused && mentioned;
+}
+
+static const char COMPLETE_DOCUMENT[] =
+    "{\"format\": 1, \"name\": \"n\", \"distro\": \"arch\", \"package_manager\": \"pacman\", "
+    "\"bootloader\": \"grub\", \"window_managers\": [], \"apps\": [], \"packages\": [], \"aur\": [], "
+    "\"flatpak\": [], \"repo_setup\": [], \"services\": [], \"user_services\": [], \"skipped\": [], "
+    "\"setup\": {}%s}";
+
+UTEST(resolve, a_complete_document_is_accepted) {
+    char document[1024];
+    snprintf(document, sizeof document, COMPLETE_DOCUMENT, "");
+    resolved_setup resolved;
+    error_list errors;
+    error_list_init(&errors);
+    ASSERT_TRUE(resolved_setup_from_json(document, "hand-over.json", &resolved, &errors));
+    resolved_setup_free(&resolved);
+    error_list_free(&errors);
+}
+
+UTEST(resolve, a_missing_list_key_is_refused) {
+    ASSERT_TRUE(is_refused_with("{\"format\": 1, \"name\": \"n\", \"distro\": \"arch\", \"package_manager\": \"pacman\", "
+                   "\"bootloader\": \"grub\", \"setup\": {}}",
+                   "missing required key 'window_managers'"));
+}
+
+UTEST(resolve, an_unknown_key_is_refused) {
+    char document[1024];
+    snprintf(document, sizeof document, COMPLETE_DOCUMENT, ", \"extra\": 1");
+    ASSERT_TRUE(is_refused_with(document, "unknown key 'extra'"));
+}
+
+UTEST(resolve, a_missing_format_is_reported_as_missing) {
+    ASSERT_TRUE(is_refused_with("{\"name\": \"n\", \"setup\": {}}", "missing required key 'format'"));
 }

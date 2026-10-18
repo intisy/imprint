@@ -1,0 +1,17 @@
+{
+  "format": 1,
+  "name": "example",
+  "distro": "arch",
+  "package_manager": "pacman",
+  "bootloader": "grub",
+  "window_managers": ["i3"],
+  "apps": ["git", "i3"],
+  "packages": ["git", "base-devel", "i3-wm"],
+  "aur": [],
+  "flatpak": [],
+  "repo_setup": [],
+  "services": [],
+  "user_services": [],
+  "skipped": [],
+  "setup": { "distro": "arch" }
+}
