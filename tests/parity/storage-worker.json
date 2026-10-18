@@ -1,0 +1,34 @@
+{
+    "profile":  "storage-migrate",
+    "packages":  [
+                     "openssh",
+                     "tailscale",
+                     "rsync",
+                     "smartmontools",
+                     "ntfs-3g",
+                     "exfatprogs",
+                     "xfsprogs",
+                     "e2fsprogs",
+                     "hdparm",
+                     "htop"
+                 ],
+    "aur":  [
+
+            ],
+    "flatpak":  [
+
+                ],
+    "repo_setup":  [
+
+                   ],
+    "services":  [
+                     "sshd",
+                     "tailscaled"
+                 ],
+    "user_services":  [
+
+                      ],
+    "skipped":  [
+
+                ]
+}
