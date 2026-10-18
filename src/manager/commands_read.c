@@ -18,13 +18,17 @@ int command_finish(cli_context *context, error_list *errors, int exit_code) {
     return exit_code;
 }
 
+static int refuse_workspace(workspace *opened, error_list *errors, cli_context *context) {
+    workspace_close(opened);
+    return command_finish(context, errors, IMPRINT_EXIT_ENVIRONMENT);
+}
+
 int command_setups(const char *root, cli_context *context) {
     error_list errors;
     error_list_init(&errors);
     workspace opened;
     if (!workspace_open(root, &opened, &errors)) {
-        workspace_close(&opened);
-        return command_finish(context, &errors, IMPRINT_EXIT_ENVIRONMENT);
+        return refuse_workspace(&opened, &errors, context);
     }
     string_list names;
     string_list_init(&names);
@@ -101,8 +105,7 @@ int command_setup_show(const char *root, const char *name, bool as_json, cli_con
     error_list_init(&errors);
     workspace opened;
     if (!workspace_open(root, &opened, &errors)) {
-        workspace_close(&opened);
-        return command_finish(context, &errors, IMPRINT_EXIT_ENVIRONMENT);
+        return refuse_workspace(&opened, &errors, context);
     }
     catalog available;
     setup loaded;
@@ -147,8 +150,7 @@ int command_validate(const char *root, cli_context *context) {
     error_list_init(&errors);
     workspace opened;
     if (!workspace_open(root, &opened, &errors)) {
-        workspace_close(&opened);
-        return command_finish(context, &errors, IMPRINT_EXIT_ENVIRONMENT);
+        return refuse_workspace(&opened, &errors, context);
     }
     catalog available;
     bool catalog_valid = catalog_load(opened.catalog_directory, opened.data_directory, &available, &errors);
