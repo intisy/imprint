@@ -11,6 +11,7 @@ typedef struct setup {
 } setup;
 
 bool setup_list(const char *data_directory, string_list *names, error_list *errors);
+char *setup_path(const char *data_directory, const char *name);
 bool setup_load(const char *data_directory, const char *name, setup *loaded, error_list *errors);
 void setup_free(setup *loaded);
 

@@ -19,7 +19,7 @@ static char *setups_directory(const char *data_directory) {
     return path_join(data_directory, "setups");
 }
 
-static char *setup_path(const char *data_directory, const char *name) {
+char *setup_path(const char *data_directory, const char *name) {
     char *directory = setups_directory(data_directory);
     char *file_name = text_format("%s.toml", name);
     char *path = path_join(directory, file_name);

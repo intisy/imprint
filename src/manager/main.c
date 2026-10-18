@@ -1,11 +1,19 @@
+#include "cli.h"
+#include "platform.h"
+#include "ui.h"
+
 #include <stdio.h>
-#include <string.h>
 
 int main(int argument_count, char **arguments) {
-    if (argument_count == 2 && strcmp(arguments[1], "--version") == 0) {
-        printf("imprint %s\n", IMPRINT_VERSION);
-        return 0;
+    ui *interface = NULL;
+    if (platform_terminal_is_interactive(stdin) && platform_terminal_is_interactive(stdout)) {
+        interface = ui_ansi_create(stdin, stdout, ui_ansi_colors_available(stdout));
     }
-    fputs("usage: imprint --version\n", stderr);
-    return 2;
+    cli_context context = { .output = stdout, .error_output = stderr, .interface = interface,
+                            .run = cli_platform_runner, .run_state = NULL };
+    int exit_code = cli_run(argument_count, (const char *const *)arguments, &context);
+    if (interface != NULL) {
+        ui_destroy(interface);
+    }
+    return exit_code;
 }
