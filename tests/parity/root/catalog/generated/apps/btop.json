@@ -1,0 +1,22 @@
+{
+  "id": "btop",
+  "name": "btop",
+  "category": "terminal",
+  "install": {
+    "arch": {
+      "packages": [
+        "btop"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "btop"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "btop"
+      ]
+    }
+  }
+}

@@ -1,0 +1,9 @@
+id = "hyprland"
+name = "Hyprland"
+type = "wayland"
+session = "display-manager"
+required_apps = ["hyprland"]
+dotfiles_directory = "hyprland"
+
+[config_files]
+".config/hypr" = "hypr"

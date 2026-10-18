@@ -1,0 +1,11 @@
+id = "i3"
+name = "i3"
+type = "x11"
+session = "xinit"
+required_apps = ["i3"]
+dotfiles_directory = "i3"
+
+[config_files]
+".config/i3/config" = "config"
+".config/i3status/config" = "i3status-config"
+".xinitrc" = "xinitrc"

@@ -1,0 +1,17 @@
+{
+  "id": "openrgb",
+  "name": "OpenRGB",
+  "category": "utilities",
+  "install": {
+    "arch": {
+      "packages": [
+        "openrgb"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "openrgb"
+      ]
+    }
+  }
+}

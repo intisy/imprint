@@ -1,0 +1,34 @@
+{
+  "id": "ripgrep",
+  "name": "ripgrep + fd + bat + eza",
+  "category": "terminal",
+  "install": {
+    "arch": {
+      "packages": [
+        "ripgrep",
+        "fd",
+        "bat",
+        "eza"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "ripgrep",
+        "fd-find",
+        "bat"
+      ],
+      "repo_setup": [
+        "wget -qO /tmp/eza.tar.gz https://github.com/eza-community/eza/releases/latest/download/eza_x86_64-unknown-linux-gnu.tar.gz",
+        "tar -xzf /tmp/eza.tar.gz -C /usr/local/bin"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "ripgrep",
+        "fd-find",
+        "bat",
+        "eza"
+      ]
+    }
+  }
+}

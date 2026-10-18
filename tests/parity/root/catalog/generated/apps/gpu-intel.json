@@ -1,0 +1,31 @@
+{
+  "id": "gpu-intel",
+  "name": "GPU drivers (Intel)",
+  "category": "gpu",
+  "install": {
+    "arch": {
+      "packages": [
+        "mesa",
+        "vulkan-intel",
+        "intel-media-driver",
+        "lib32-mesa",
+        "lib32-vulkan-intel"
+      ],
+      "repo_setup": [
+        "grep -q '^\\[multilib\\]' /etc/pacman.conf || printf '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist\n' >> /etc/pacman.conf"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "mesa-vulkan-drivers",
+        "intel-media-va-driver"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "mesa-vulkan-drivers",
+        "intel-media-driver"
+      ]
+    }
+  }
+}

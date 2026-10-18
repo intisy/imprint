@@ -1,0 +1,34 @@
+{
+  "id": "anydesk",
+  "name": "AnyDesk",
+  "category": "remote",
+  "install": {
+    "arch": {
+      "aur": [
+        "anydesk-bin"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "anydesk"
+      ],
+      "repo_setup": [
+        "curl -fsSL https://keys.anydesk.com/repos/DEB-GPG-KEY | gpg --dearmor -o /usr/share/keyrings/anydesk-keyring.gpg",
+        "echo 'deb [signed-by=/usr/share/keyrings/anydesk-keyring.gpg] http://deb.anydesk.com/ all main' > /etc/apt/sources.list.d/anydesk-stable.list"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "anydesk"
+      ],
+      "repo_setup": [
+        "rpm --import https://keys.anydesk.com/repos/RPM-GPG-KEY",
+        "echo '[anydesk]' > /etc/yum.repos.d/anydesk.repo",
+        "echo 'name=AnyDesk' >> /etc/yum.repos.d/anydesk.repo",
+        "echo 'baseurl=http://rpm.anydesk.com/centos/$releasever/$basearch/' >> /etc/yum.repos.d/anydesk.repo",
+        "echo 'gpgcheck=1' >> /etc/yum.repos.d/anydesk.repo",
+        "echo 'gpgkey=https://keys.anydesk.com/repos/RPM-GPG-KEY' >> /etc/yum.repos.d/anydesk.repo"
+      ]
+    }
+  }
+}

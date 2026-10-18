@@ -1,0 +1,22 @@
+{
+  "id": "mpv",
+  "name": "mpv",
+  "category": "media",
+  "install": {
+    "arch": {
+      "packages": [
+        "mpv"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "mpv"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "mpv"
+      ]
+    }
+  }
+}

@@ -45,5 +45,4 @@ add_test(NAME plan_round_trip
 
 add_executable(imprint-parity-tests parity/test_parity.c)
 target_link_libraries(imprint-parity-tests PRIVATE imprint_core imprint_warnings)
-add_test(NAME parity COMMAND imprint-parity-tests ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/parity)
-set_tests_properties(parity PROPERTIES SKIP_RETURN_CODE 77)
+add_test(NAME parity COMMAND imprint-parity-tests ${CMAKE_CURRENT_SOURCE_DIR}/parity/root ${CMAKE_CURRENT_SOURCE_DIR}/parity)

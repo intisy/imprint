@@ -1,0 +1,30 @@
+{
+  "id": "kitty",
+  "name": "kitty",
+  "category": "terminal",
+  "install": {
+    "arch": {
+      "packages": [
+        "kitty"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "kitty"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "kitty"
+      ]
+    }
+  },
+  "config": {
+    "files": [
+      {
+        "path": "~/.config/kitty/kitty.conf",
+        "content": "font_family JetBrains Mono\nfont_size 11.0\nenable_audio_bell no\nscrollback_lines 10000\n"
+      }
+    ]
+  }
+}

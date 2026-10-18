@@ -1,0 +1,22 @@
+{
+  "id": "deno",
+  "name": "Deno",
+  "category": "development",
+  "install": {
+    "arch": {
+      "packages": [
+        "deno"
+      ]
+    },
+    "debian": {
+      "repo_setup": [
+        "curl -fsSL https://deno.land/install.sh | sh"
+      ]
+    },
+    "fedora": {
+      "repo_setup": [
+        "curl -fsSL https://deno.land/install.sh | sh"
+      ]
+    }
+  }
+}

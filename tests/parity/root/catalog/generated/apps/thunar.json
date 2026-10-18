@@ -1,0 +1,22 @@
+{
+  "id": "thunar",
+  "name": "Thunar",
+  "category": "filemanager",
+  "install": {
+    "arch": {
+      "packages": [
+        "thunar"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "thunar"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "thunar"
+      ]
+    }
+  }
+}

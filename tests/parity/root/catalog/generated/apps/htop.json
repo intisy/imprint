@@ -1,0 +1,22 @@
+{
+  "id": "htop",
+  "name": "htop",
+  "category": "utilities",
+  "install": {
+    "arch": {
+      "packages": [
+        "htop"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "htop"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "htop"
+      ]
+    }
+  }
+}

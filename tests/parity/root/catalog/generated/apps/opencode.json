@@ -1,0 +1,22 @@
+{
+  "id": "opencode",
+  "name": "OpenCode (AI coding)",
+  "category": "ai",
+  "install": {
+    "arch": {
+      "aur": [
+        "opencode-bin"
+      ]
+    },
+    "debian": {
+      "repo_setup": [
+        "curl -fsSL https://opencode.ai/install.sh | sh"
+      ]
+    },
+    "fedora": {
+      "repo_setup": [
+        "curl -fsSL https://opencode.ai/install.sh | sh"
+      ]
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "chromium",
+  "name": "Chromium",
+  "category": "browsers",
+  "install": {
+    "arch": {
+      "packages": [
+        "chromium"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "chromium-browser"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "chromium"
+      ]
+    }
+  }
+}

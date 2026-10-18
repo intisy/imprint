@@ -1,0 +1,25 @@
+{
+  "id": "pulseaudio",
+  "name": "PulseAudio",
+  "category": "audio",
+  "install": {
+    "arch": {
+      "packages": [
+        "pulseaudio",
+        "pavucontrol"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "pulseaudio",
+        "pavucontrol"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "pulseaudio",
+        "pavucontrol"
+      ]
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "id": "gpu-nvidia",
+  "name": "GPU drivers (NVIDIA open kernel modules, Turing and newer)",
+  "category": "gpu",
+  "install": {
+    "arch": {
+      "packages": [
+        "nvidia-open-dkms",
+        "nvidia-utils",
+        "lib32-nvidia-utils",
+        "linux-headers",
+        "dkms",
+        "egl-wayland"
+      ],
+      "repo_setup": [
+        "grep -q '^\\[multilib\\]' /etc/pacman.conf || printf '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist\n' >> /etc/pacman.conf"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "nvidia-driver"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "akmod-nvidia"
+      ]
+    }
+  }
+}

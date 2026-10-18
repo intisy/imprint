@@ -1,0 +1,24 @@
+{
+  "id": "lazygit",
+  "name": "lazygit",
+  "category": "terminal",
+  "install": {
+    "arch": {
+      "packages": [
+        "lazygit"
+      ]
+    },
+    "debian": {
+      "repo_setup": [
+        "LAZYGIT_VERSION=$(curl -s 'https://api.github.com/repos/jesseduffield/lazygit/releases/latest' | grep -Po '\"tag_name\": \"v\\K[^\"]*')",
+        "curl -Lo /tmp/lazygit.tar.gz \"https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz\"",
+        "tar -xzf /tmp/lazygit.tar.gz -C /usr/local/bin lazygit"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "lazygit"
+      ]
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "id": "git",
+  "name": "Git + base-devel",
+  "category": "development",
+  "install": {
+    "arch": {
+      "packages": [
+        "base-devel",
+        "git",
+        "wget",
+        "curl"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "build-essential",
+        "git",
+        "wget",
+        "curl"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "git",
+        "wget",
+        "curl",
+        "@development-tools"
+      ]
+    }
+  },
+  "config": {
+    "post_install": [
+      "git config --system init.defaultBranch main || git config --global init.defaultBranch main"
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "id": "gaming",
+  "name": "Gaming (Wine/Lutris/Steam tools)",
+  "category": "gaming",
+  "install": {
+    "arch": {
+      "packages": [
+        "wine",
+        "wine-gecko",
+        "winetricks",
+        "lutris",
+        "bottles",
+        "gamescope",
+        "mangohud"
+      ],
+      "aur": [
+        "protontricks",
+        "wine-mono"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "wine",
+        "winetricks",
+        "lutris",
+        "gamescope",
+        "mangohud"
+      ],
+      "flatpak": [
+        "com.usebottles.bottles"
+      ]
+    }
+  }
+}

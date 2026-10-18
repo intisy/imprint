@@ -1,0 +1,22 @@
+{
+  "id": "blender",
+  "name": "Blender",
+  "category": "media",
+  "install": {
+    "arch": {
+      "packages": [
+        "blender"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "blender"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "blender"
+      ]
+    }
+  }
+}

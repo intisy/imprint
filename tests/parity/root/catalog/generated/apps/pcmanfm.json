@@ -1,0 +1,22 @@
+{
+  "id": "pcmanfm",
+  "name": "PCManFM",
+  "category": "filemanager",
+  "install": {
+    "arch": {
+      "packages": [
+        "pcmanfm-gtk3"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "pcmanfm"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "pcmanfm"
+      ]
+    }
+  }
+}

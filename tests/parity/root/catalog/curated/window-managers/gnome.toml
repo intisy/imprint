@@ -1,0 +1,8 @@
+id = "gnome"
+name = "GNOME"
+type = "wayland"
+session = "display-manager"
+required_apps = ["gnome"]
+dotfiles_directory = "gnome"
+
+[config_files]

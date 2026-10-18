@@ -1,0 +1,39 @@
+{
+  "id": "sway",
+  "name": "Sway",
+  "category": "desktop",
+  "install": {
+    "arch": {
+      "packages": [
+        "sway",
+        "swaybg",
+        "swaylock",
+        "swayidle",
+        "foot",
+        "wofi",
+        "waybar"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "sway",
+        "swaybg",
+        "swaylock",
+        "foot",
+        "wofi"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "sway",
+        "swaybg",
+        "swaylock",
+        "foot",
+        "wofi"
+      ]
+    }
+  },
+  "config_files": {
+    ".config/sway/config": "config"
+  }
+}

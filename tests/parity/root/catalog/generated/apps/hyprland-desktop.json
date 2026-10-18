@@ -1,0 +1,50 @@
+{
+  "id": "hyprland-desktop",
+  "name": "Hyprland desktop suite",
+  "category": "desktop",
+  "install": {
+    "arch": {
+      "packages": [
+        "waybar",
+        "wofi",
+        "rofi",
+        "dunst",
+        "mako",
+        "wl-clipboard",
+        "cliphist",
+        "pamixer",
+        "hyprpaper",
+        "hyprlock",
+        "hypridle",
+        "swaylock",
+        "swayidle",
+        "grim",
+        "slurp",
+        "wlogout",
+        "swaync",
+        "nwg-look",
+        "waypaper",
+        "polkit-gnome",
+        "xdg-desktop-portal-gtk",
+        "xdg-desktop-portal-hyprland",
+        "brightnessctl",
+        "libnotify"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "waybar",
+        "wofi",
+        "rofi-wayland",
+        "dunst",
+        "mako",
+        "wl-clipboard",
+        "grim",
+        "slurp",
+        "brightnessctl",
+        "libnotify",
+        "polkit-gnome"
+      ]
+    }
+  }
+}

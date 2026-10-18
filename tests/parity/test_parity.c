@@ -1,6 +1,5 @@
 #include "catalog.h"
 #include "document.h"
-#include "platform.h"
 #include "resolve.h"
 #include "setup.h"
 #include "text.h"
@@ -8,8 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-enum { PARITY_SKIPPED = 77 };
 
 typedef struct parity_case {
     const char *setup_name;
@@ -90,23 +87,12 @@ static size_t compare_case(const char *root, const char *references, const catal
     return differences;
 }
 
-static bool data_is_the_private_repo(const char *root) {
-    char *probe = path_join(root, "data/setups/workstation.toml");
-    bool found = platform_is_file(probe);
-    free(probe);
-    return found;
-}
-
 int main(int argument_count, char **arguments) {
     if (argument_count != 3) {
         fputs("usage: imprint-parity-tests <root> <reference directory>\n", stderr);
         return 2;
     }
     const char *root = arguments[1];
-    if (!data_is_the_private_repo(root)) {
-        printf("skipped: data/ is not imprint-data (run: imprint data use intisy/imprint-data)\n");
-        return PARITY_SKIPPED;
-    }
     error_list errors;
     error_list_init(&errors);
     char *catalog_directory = path_join(root, "catalog");

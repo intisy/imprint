@@ -1,0 +1,22 @@
+{
+  "id": "neovim",
+  "name": "Neovim",
+  "category": "development",
+  "install": {
+    "arch": {
+      "packages": [
+        "neovim"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "neovim"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "neovim"
+      ]
+    }
+  }
+}

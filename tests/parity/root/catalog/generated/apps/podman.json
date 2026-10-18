@@ -1,0 +1,24 @@
+{
+  "id": "podman",
+  "name": "Podman",
+  "category": "containers",
+  "install": {
+    "arch": {
+      "packages": [
+        "podman",
+        "podman-compose"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "podman"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "podman",
+        "podman-compose"
+      ]
+    }
+  }
+}
