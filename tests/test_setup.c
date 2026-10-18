@@ -35,6 +35,7 @@ UTEST(setup, list_returns_the_setups_sorted) {
     ASSERT_STREQ("base,example,workstation", joined);
     free(joined);
     string_list_free(&names);
+    error_list_free(&errors);
 }
 
 UTEST(setup, list_names_each_file_that_breaks_the_pattern_and_keeps_the_rest) {
@@ -157,6 +158,22 @@ UTEST(setup, a_remove_with_the_wrong_shape_is_reported_with_its_file) {
     ASSERT_TRUE(error_list_mentions(&errors, "remove-shape.toml:4: remove.apps: must be an array"));
     ASSERT_FALSE(load_broken("remove-families", &errors));
     ASSERT_TRUE(error_list_mentions(&errors, "remove-families.toml:4: remove.extra_packages: must be a table of arrays"));
+    error_list_free(&errors);
+}
+
+UTEST(setup, a_remove_that_is_not_a_table_is_reported_with_its_file) {
+    error_list errors;
+    error_list_init(&errors);
+    ASSERT_FALSE(load_broken("remove-list", &errors));
+    ASSERT_TRUE(error_list_mentions(&errors, "remove-list.toml:2: remove"));
+    error_list_free(&errors);
+}
+
+UTEST(setup, an_extends_that_is_not_a_string_is_reported_with_its_file) {
+    error_list errors;
+    error_list_init(&errors);
+    ASSERT_FALSE(load_broken("extends-number", &errors));
+    ASSERT_TRUE(error_list_mentions(&errors, "extends-number.toml:1: extends"));
     error_list_free(&errors);
 }
 
