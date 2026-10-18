@@ -12,6 +12,7 @@ add_library(imprint_core STATIC
     catalog_validate.c
     setup_merge.c
     setup.c
+    resolve.c
 )
 if(WIN32)
     target_sources(imprint_core PRIVATE platform_windows.c)
