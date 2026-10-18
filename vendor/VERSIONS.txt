@@ -1,3 +1,4 @@
 name       upstream                              pinned at                                                   licence
 utest.h    https://github.com/sheredom/utest.h   commit 706f3574fec4915e78d9234870cfcdf22f7af5d9             Unlicense (in the header)
 tomlc17    https://github.com/cktan/tomlc17      release R261003, commit 8d3766ddafa6515417f4885ae6878ef69fac401e   MIT (vendor/tomlc17/LICENSE)
+cJSON      https://github.com/DaveGamble/cJSON   release v1.7.19, commit c859b25da02955fef659d658b8f324b5cde87be3   MIT (vendor/cjson/LICENSE)

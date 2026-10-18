@@ -69,6 +69,10 @@ bool document_check_keys(const document_node *table, const char *const *allowed,
                          error_list *errors);
 
 document_node *document_parse_toml(const char *text, const char *file, error_list *errors);
+document_node *document_parse_json(const char *text, const char *file, error_list *errors);
+char *document_to_json(const document_node *node);
+bool file_read_all(const char *path, char **text, error_list *errors);
+document_node *document_load_file(const char *path, error_list *errors);
 
 const char *document_skip_byte_order_mark(const char *text);
 
