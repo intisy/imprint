@@ -1,0 +1,26 @@
+{
+  "id": "unzip",
+  "name": "Archive tools",
+  "category": "utilities",
+  "install": {
+    "arch": {
+      "packages": [
+        "unzip",
+        "p7zip"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "unzip",
+        "p7zip-full"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "unzip",
+        "p7zip",
+        "p7zip-plugins"
+      ]
+    }
+  }
+}

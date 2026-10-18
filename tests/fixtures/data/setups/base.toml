@@ -1,0 +1,15 @@
+distro = "arch"
+display_manager = "gdm"
+window_managers = ["i3"]
+apps = ["git", "firefox", "synaptic"]
+notes = ["base notes"]
+
+[install]
+timezone = "UTC"
+locale = "en_US.UTF-8"
+
+[extra_packages]
+arch = ["htop", "rsync"]
+
+[system]
+user_groups = ["video", "docker"]

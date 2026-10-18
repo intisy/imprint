@@ -1,0 +1,22 @@
+{
+  "id": "keepassxc",
+  "name": "KeePassXC",
+  "category": "utilities",
+  "install": {
+    "arch": {
+      "packages": [
+        "keepassxc"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "keepassxc"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "keepassxc"
+      ]
+    }
+  }
+}

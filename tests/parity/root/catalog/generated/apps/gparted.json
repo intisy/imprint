@@ -1,0 +1,22 @@
+{
+  "id": "gparted",
+  "name": "GParted",
+  "category": "utilities",
+  "install": {
+    "arch": {
+      "packages": [
+        "gparted"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "gparted"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "gparted"
+      ]
+    }
+  }
+}

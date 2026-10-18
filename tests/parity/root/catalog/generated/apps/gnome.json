@@ -1,0 +1,35 @@
+{
+  "id": "gnome",
+  "name": "GNOME",
+  "category": "desktop",
+  "install": {
+    "arch": {
+      "packages": [
+        "gnome-shell",
+        "gnome-session",
+        "gnome-control-center",
+        "nautilus",
+        "gnome-terminal",
+        "gnome-tweaks"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "gnome-shell",
+        "gnome-session",
+        "gnome-control-center",
+        "nautilus",
+        "gnome-terminal"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "gnome-shell",
+        "gnome-session",
+        "gnome-control-center",
+        "nautilus",
+        "gnome-terminal"
+      ]
+    }
+  }
+}

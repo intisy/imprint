@@ -1,0 +1,30 @@
+{
+  "id": "starship",
+  "name": "Starship",
+  "category": "terminal",
+  "install": {
+    "arch": {
+      "packages": [
+        "starship"
+      ]
+    },
+    "debian": {
+      "repo_setup": [
+        "curl -fsSL https://starship.rs/install.sh | sh -s -- -y"
+      ]
+    },
+    "fedora": {
+      "repo_setup": [
+        "curl -fsSL https://starship.rs/install.sh | sh -s -- -y"
+      ]
+    }
+  },
+  "config": {
+    "files": [
+      {
+        "path": "~/.config/starship.toml",
+        "content": "add_newline = false\n[character]\nsuccess_symbol = \"[>](bold green)\"\nerror_symbol = \"[>](bold red)\"\n"
+      }
+    ]
+  }
+}

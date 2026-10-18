@@ -1,0 +1,26 @@
+{
+  "id": "scrcpy",
+  "name": "scrcpy + android-tools",
+  "category": "utilities",
+  "install": {
+    "arch": {
+      "packages": [
+        "scrcpy",
+        "android-tools",
+        "android-udev"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "scrcpy",
+        "android-tools-adb"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "scrcpy",
+        "android-tools"
+      ]
+    }
+  }
+}

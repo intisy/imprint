@@ -1,0 +1,35 @@
+{
+  "id": "tailscale",
+  "name": "Tailscale",
+  "category": "remote",
+  "install": {
+    "arch": {
+      "packages": [
+        "tailscale"
+      ],
+      "services": [
+        "tailscaled"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "tailscale"
+      ],
+      "repo_setup": [
+        "curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/jammy.noarmor.gpg | tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null",
+        "curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/jammy.tailscale-keyring.list | tee /etc/apt/sources.list.d/tailscale.list"
+      ],
+      "services": [
+        "tailscaled"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "tailscale"
+      ],
+      "repo_setup": [
+        "curl -fsSL https://tailscale.com/install.sh | sh"
+      ]
+    }
+  }
+}

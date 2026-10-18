@@ -1,0 +1,31 @@
+{
+  "id": "pipewire",
+  "name": "PipeWire",
+  "category": "audio",
+  "install": {
+    "arch": {
+      "packages": [
+        "pipewire",
+        "pipewire-pulse",
+        "wireplumber",
+        "pavucontrol"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "pipewire",
+        "pipewire-pulse",
+        "wireplumber",
+        "pavucontrol"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "pipewire",
+        "pipewire-pulse",
+        "wireplumber",
+        "pavucontrol"
+      ]
+    }
+  }
+}

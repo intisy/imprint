@@ -1,0 +1,3 @@
+extends = "chain-b"
+display_manager = "sddm"
+apps = ["nano"]

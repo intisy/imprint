@@ -1,0 +1,23 @@
+{
+  "id": "wireguard",
+  "name": "WireGuard",
+  "category": "remote",
+  "install": {
+    "arch": {
+      "packages": [
+        "wireguard-tools"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "wireguard",
+        "wireguard-tools"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "wireguard-tools"
+      ]
+    }
+  }
+}

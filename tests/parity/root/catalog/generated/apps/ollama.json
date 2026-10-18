@@ -1,0 +1,28 @@
+{
+  "id": "ollama",
+  "name": "Ollama",
+  "category": "ai",
+  "install": {
+    "arch": {
+      "aur": [
+        "ollama-bin"
+      ],
+      "services": [
+        "ollama"
+      ]
+    },
+    "debian": {
+      "repo_setup": [
+        "curl -fsSL https://ollama.com/install.sh | sh"
+      ],
+      "services": [
+        "ollama"
+      ]
+    },
+    "fedora": {
+      "repo_setup": [
+        "curl -fsSL https://ollama.com/install.sh | sh"
+      ]
+    }
+  }
+}

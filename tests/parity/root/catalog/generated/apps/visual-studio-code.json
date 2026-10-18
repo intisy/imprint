@@ -1,0 +1,46 @@
+{
+  "id": "visual-studio-code",
+  "name": "Visual Studio Code",
+  "category": "development",
+  "install": {
+    "arch": {
+      "aur": [
+        "visual-studio-code-bin"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "code"
+      ],
+      "repo_setup": [
+        "curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-archive-keyring.gpg",
+        "echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/repos/code stable main' > /etc/apt/sources.list.d/vscode.list"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "code"
+      ],
+      "repo_setup": [
+        "rpm --import https://packages.microsoft.com/keys/microsoft.asc",
+        "echo '[code]' > /etc/yum.repos.d/vscode.repo",
+        "echo 'name=Visual Studio Code' >> /etc/yum.repos.d/vscode.repo",
+        "echo 'baseurl=https://packages.microsoft.com/yumrepos/vscode' >> /etc/yum.repos.d/vscode.repo",
+        "echo 'enabled=1' >> /etc/yum.repos.d/vscode.repo",
+        "echo 'gpgcheck=1' >> /etc/yum.repos.d/vscode.repo",
+        "echo 'gpgkey=https://packages.microsoft.com/keys/microsoft.asc' >> /etc/yum.repos.d/vscode.repo"
+      ]
+    }
+  },
+  "config": {
+    "extensions": [
+      "vscodevim.vim"
+    ],
+    "files": [
+      {
+        "path": "~/.config/Code/User/settings.json",
+        "content": "{\n  \"telemetry.telemetryLevel\": \"off\",\n  \"editor.renderWhitespace\": \"boundary\",\n  \"files.trimTrailingWhitespace\": true\n}\n"
+      }
+    ]
+  }
+}

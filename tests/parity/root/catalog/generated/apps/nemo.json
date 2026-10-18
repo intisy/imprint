@@ -1,0 +1,22 @@
+{
+  "id": "nemo",
+  "name": "Nemo",
+  "category": "filemanager",
+  "install": {
+    "arch": {
+      "packages": [
+        "nemo"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "nemo"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "nemo"
+      ]
+    }
+  }
+}

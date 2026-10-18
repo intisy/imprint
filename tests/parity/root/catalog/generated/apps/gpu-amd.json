@@ -1,0 +1,30 @@
+{
+  "id": "gpu-amd",
+  "name": "GPU drivers (AMD)",
+  "category": "gpu",
+  "install": {
+    "arch": {
+      "packages": [
+        "mesa",
+        "vulkan-radeon",
+        "libva-mesa-driver",
+        "lib32-mesa",
+        "lib32-vulkan-radeon"
+      ],
+      "repo_setup": [
+        "grep -q '^\\[multilib\\]' /etc/pacman.conf || printf '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist\n' >> /etc/pacman.conf"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "mesa-vulkan-drivers",
+        "libgl1-mesa-dri"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "mesa-vulkan-drivers"
+      ]
+    }
+  }
+}

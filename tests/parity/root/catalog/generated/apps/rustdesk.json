@@ -1,0 +1,24 @@
+{
+  "id": "rustdesk",
+  "name": "RustDesk",
+  "category": "remote",
+  "install": {
+    "arch": {
+      "aur": [
+        "rustdesk-bin"
+      ]
+    },
+    "debian": {
+      "repo_setup": [
+        "wget -qO /tmp/rustdesk.deb https://github.com/rustdesk/rustdesk/releases/latest/download/rustdesk-1.3.8-x86_64.deb",
+        "dpkg -i /tmp/rustdesk.deb || apt-get -f install -y"
+      ]
+    },
+    "fedora": {
+      "repo_setup": [
+        "wget -qO /tmp/rustdesk.rpm https://github.com/rustdesk/rustdesk/releases/latest/download/rustdesk-1.3.8-0.x86_64.rpm",
+        "dnf install -y /tmp/rustdesk.rpm"
+      ]
+    }
+  }
+}

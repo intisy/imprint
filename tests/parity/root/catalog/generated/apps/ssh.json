@@ -1,0 +1,28 @@
+{
+  "id": "ssh",
+  "name": "OpenSSH",
+  "category": "remote",
+  "install": {
+    "arch": {
+      "packages": [
+        "openssh"
+      ],
+      "services": [
+        "sshd"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "openssh-server"
+      ],
+      "services": [
+        "ssh"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "openssh-server"
+      ]
+    }
+  }
+}

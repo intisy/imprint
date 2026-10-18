@@ -1,0 +1,4 @@
+distro = "arch"
+
+[remove]
+notes = ["x"]

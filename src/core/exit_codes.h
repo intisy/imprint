@@ -1,0 +1,11 @@
+#ifndef IMPRINT_EXIT_CODES_H
+#define IMPRINT_EXIT_CODES_H
+
+enum imprint_exit_code {
+    IMPRINT_EXIT_OK = 0,
+    IMPRINT_EXIT_INVALID = 1,
+    IMPRINT_EXIT_USAGE = 2,
+    IMPRINT_EXIT_ENVIRONMENT = 3
+};
+
+#endif

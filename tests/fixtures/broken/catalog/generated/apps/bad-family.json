@@ -1,0 +1,1 @@
+{ "id": "bad-family", "name": "Bad Family", "install": { "gentoo": { "packages": ["x"] } } }

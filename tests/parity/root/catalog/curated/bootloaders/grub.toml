@@ -1,0 +1,7 @@
+id = "grub"
+name = "GRUB"
+install_command = "grub-install --target={target} --efi-directory={esp} --bootloader-id={id}"
+config_path = "/etc/default/grub"
+mkconfig_command = "grub-mkconfig -o /boot/grub/grub.cfg"
+resume_command_line = "resume=UUID={uuid} resume_offset={offset}"
+mkinitcpio_hook = "resume"

@@ -1,0 +1,26 @@
+{
+  "id": "jetbrains-toolbox",
+  "name": "JetBrains Toolbox",
+  "category": "development",
+  "install": {
+    "arch": {
+      "aur": [
+        "jetbrains-toolbox"
+      ]
+    },
+    "debian": {
+      "repo_setup": [
+        "wget -qO /tmp/jetbrains-toolbox.tar.gz 'https://download.jetbrains.com/toolbox/jetbrains-toolbox-2.5.2.35332.tar.gz'",
+        "tar -xzf /tmp/jetbrains-toolbox.tar.gz -C /opt/",
+        "ln -sf /opt/jetbrains-toolbox-*/jetbrains-toolbox /usr/local/bin/jetbrains-toolbox"
+      ]
+    },
+    "fedora": {
+      "repo_setup": [
+        "wget -qO /tmp/jetbrains-toolbox.tar.gz 'https://download.jetbrains.com/toolbox/jetbrains-toolbox-2.5.2.35332.tar.gz'",
+        "tar -xzf /tmp/jetbrains-toolbox.tar.gz -C /opt/",
+        "ln -sf /opt/jetbrains-toolbox-*/jetbrains-toolbox /usr/local/bin/jetbrains-toolbox"
+      ]
+    }
+  }
+}

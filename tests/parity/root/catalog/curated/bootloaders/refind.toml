@@ -1,0 +1,5 @@
+id = "refind"
+name = "rEFInd"
+install_command = "refind-install"
+config_path = "/boot/EFI/refind/refind.conf"
+mkconfig_command = ""

@@ -1,0 +1,30 @@
+{
+  "id": "tmux",
+  "name": "tmux",
+  "category": "terminal",
+  "install": {
+    "arch": {
+      "packages": [
+        "tmux"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "tmux"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "tmux"
+      ]
+    }
+  },
+  "config": {
+    "files": [
+      {
+        "path": "~/.tmux.conf",
+        "content": "set -g mouse on\nset -g history-limit 10000\nset -g default-terminal \"tmux-256color\"\nsetw -g mode-keys vi\n"
+      }
+    ]
+  }
+}

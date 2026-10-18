@@ -1,0 +1,28 @@
+{
+  "id": "base",
+  "name": "Base fonts",
+  "category": "fonts",
+  "install": {
+    "arch": {
+      "packages": [
+        "ttf-dejavu",
+        "ttf-liberation",
+        "noto-fonts"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "fonts-dejavu",
+        "fonts-liberation",
+        "fonts-noto"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "dejavu-fonts-all",
+        "liberation-fonts",
+        "google-noto-fonts-common"
+      ]
+    }
+  }
+}

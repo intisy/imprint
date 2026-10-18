@@ -1,0 +1,20 @@
+{
+  "id": "iwd",
+  "name": "iwd",
+  "category": "networking",
+  "install": {
+    "arch": {
+      "packages": [
+        "iwd"
+      ],
+      "services": [
+        "iwd"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "iwd"
+      ]
+    }
+  }
+}

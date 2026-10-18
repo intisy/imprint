@@ -1,0 +1,82 @@
+extends = "base"
+window_managers = ["i3"]
+apps = [
+    "syncthing",
+    "steam",
+    "blender",
+    "brave",
+    "anydesk",
+    "jetbrains-toolbox",
+    "ssh",
+    "tailscale",
+]
+bootloader = "grub"
+extra_aur = [
+    "activitywatch-bin",
+    "github-desktop-bin",
+    "google-cloud-cli",
+    "jackett-bin",
+    "ledger-live-bin",
+    "ledger-udev",
+    "lunar-client",
+    "proton-pass-bin",
+]
+flatpaks = [
+    "com.bambulab.BambuStudio",
+    "com.stremio.Stremio",
+    "app.zen_browser.zen",
+    "io.ente.auth",
+    "com.modrinth.ModrinthApp",
+    "com.yubico.yubioath",
+    "org.vinegarhq.Sober",
+    "com.github.IsmaelMartinez.teams_for_linux",
+]
+extra_services = ["power-profiles-daemon.service", "pcscd.socket", "fstrim.timer"]
+user_services = ["syncthing.service", "drive-sync.service"]
+
+[remove]
+window_managers = ["gnome"]
+apps = ["dev-toolchains", "yazi"]
+
+[extra_packages]
+arch = [
+    "nvidia-prime",
+    "power-profiles-daemon",
+    "fprintd",
+    "brightnessctl",
+    "flatpak",
+    "cmake",
+    "meson",
+    "ninja",
+    "gcc",
+    "clang",
+    "go",
+    "git-lfs",
+    "rustup",
+    "yazi",
+    "jdk-openjdk",
+    "jdk17-openjdk",
+    "jdk8-openjdk",
+    "github-cli",
+    "glab",
+    "lua",
+    "discord",
+    "obsidian",
+    "openscad",
+    "qbittorrent",
+    "vlc",
+    "smartmontools",
+    "telegram-desktop",
+    "unrar",
+    "7zip",
+    "proton-vpn-gtk-app",
+    "ausweisapp",
+    "spotify-launcher",
+    "pcsclite",
+    "ccid",
+    "gamemode",
+    "lib32-gamemode",
+    "mangohud",
+    "lib32-mangohud",
+    "gamescope",
+]

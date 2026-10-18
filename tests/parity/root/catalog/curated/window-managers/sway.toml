@@ -1,0 +1,9 @@
+id = "sway"
+name = "Sway"
+type = "wayland"
+session = "xinit"
+required_apps = ["sway"]
+dotfiles_directory = "sway"
+
+[config_files]
+".config/sway/config" = "config"

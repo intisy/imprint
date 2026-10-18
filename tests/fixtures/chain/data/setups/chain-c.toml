@@ -1,0 +1,6 @@
+distro = "arch"
+display_manager = "gdm"
+apps = ["git"]
+
+[install]
+locale = "en_US.UTF-8"

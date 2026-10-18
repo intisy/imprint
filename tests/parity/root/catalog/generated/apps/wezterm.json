@@ -1,0 +1,17 @@
+{
+  "id": "wezterm",
+  "name": "WezTerm",
+  "category": "terminal",
+  "install": {
+    "arch": {
+      "packages": [
+        "wezterm"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "wezterm"
+      ]
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "id": "nodejs",
+  "name": "Node.js + npm",
+  "category": "development",
+  "install": {
+    "arch": {
+      "packages": [
+        "nodejs",
+        "npm"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "nodejs",
+        "npm"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "nodejs",
+        "npm"
+      ]
+    }
+  }
+}
