@@ -245,10 +245,11 @@ void document_error(error_list *errors, const document_node *node, const char *f
     char *message = text_format_arguments(format, arguments);
     va_end(arguments);
     char *path = document_path(node);
+    const char *file = node == NULL ? NULL : node->file;
     if (path[0] == '\0') {
-        error_push(errors, node->file, nearest_line(node), "%s", message);
+        error_push(errors, file, nearest_line(node), "%s", message);
     } else {
-        error_push(errors, node->file, nearest_line(node), "%s: %s", path, message);
+        error_push(errors, file, nearest_line(node), "%s: %s", path, message);
     }
     free(path);
     free(message);

@@ -50,6 +50,16 @@ UTEST(document, require_string_reports_a_missing_key) {
     document_free(root);
 }
 
+UTEST(document, require_string_from_a_null_table_names_the_key) {
+    error_list errors;
+    error_list_init(&errors);
+    const char *name = NULL;
+    ASSERT_FALSE(document_require_string(NULL, "name", &name, &errors));
+    ASSERT_EQ((size_t)1, errors.count);
+    ASSERT_TRUE(error_list_mentions(&errors, "missing required key 'name'"));
+    error_list_free(&errors);
+}
+
 UTEST(document, require_string_reports_the_wrong_kind_with_its_line) {
     document_node *root = sample();
     error_list errors;
