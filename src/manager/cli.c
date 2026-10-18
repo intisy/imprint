@@ -90,6 +90,23 @@ static int run_setup(const invocation *parsed, cli_context *context) {
     return command_setup_show(parsed->root, parsed->words[2], as_json, context);
 }
 
+static int run_data(const invocation *parsed, cli_context *context) {
+    if (!word_is(parsed, 1, "use")) {
+        return usage_error(context, "unknown data command", parsed->word_count > 1 ? parsed->words[1] : "");
+    }
+    if (parsed->word_count > 3) {
+        return usage_error(context, "too many arguments for", "data use");
+    }
+    return command_data_use(parsed->root, parsed->word_count == 3 ? parsed->words[2] : NULL, context);
+}
+
+static int run_catalog(const invocation *parsed, cli_context *context) {
+    if (!word_is(parsed, 1, "update") || parsed->word_count != 2) {
+        return usage_error(context, "unknown catalog command", parsed->word_count > 1 ? parsed->words[1] : "");
+    }
+    return command_catalog_update(parsed->root, context);
+}
+
 static int run_alone(const invocation *parsed, cli_context *context, int (*command)(const char *, cli_context *)) {
     if (parsed->word_count > 1) {
         return usage_error(context, "too many arguments for", parsed->words[0]);
@@ -115,6 +132,12 @@ int cli_run(int argument_count, const char *const *arguments, cli_context *conte
     }
     if (strcmp(command, "setup") == 0) {
         return run_setup(&parsed, context);
+    }
+    if (strcmp(command, "data") == 0) {
+        return run_data(&parsed, context);
+    }
+    if (strcmp(command, "catalog") == 0) {
+        return run_catalog(&parsed, context);
     }
     if (strcmp(command, "help") == 0) {
         fputs(USAGE, context->output);

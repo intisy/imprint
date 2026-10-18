@@ -15,6 +15,7 @@ set(IMPRINT_TEST_SOURCES
     test_ui.c
     cli_harness.c
     test_cli.c
+    test_cli_git.c
 )
 
 add_executable(imprint-tests ${IMPRINT_TEST_SOURCES})
