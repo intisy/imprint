@@ -1,0 +1,27 @@
+id = "arch"
+name = "Arch / EndeavourOS"
+package_manager = "pacman"
+persistence_label = "vtoycow"
+iso_match = ["archlinux", "endeavouros", "manjaro", "blackarch"]
+installer = "pacstrap"
+initramfs_tool = "mkinitcpio"
+kernel_packages = ["linux", "linux-firmware"]
+
+[extra_sources]
+aur = true
+flatpak = true
+
+[[variants]]
+id = "arch"
+name = "Arch Linux"
+iso_match = ["archlinux", "arch"]
+
+[[variants]]
+id = "endeavouros"
+name = "EndeavourOS"
+iso_match = ["endeavouros"]
+
+[[variants]]
+id = "manjaro"
+name = "Manjaro"
+iso_match = ["manjaro"]

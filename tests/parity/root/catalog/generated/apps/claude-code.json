@@ -1,0 +1,22 @@
+{
+  "id": "claude-code",
+  "name": "Claude Code",
+  "category": "ai",
+  "install": {
+    "arch": {
+      "aur": [
+        "claude-code-bin"
+      ]
+    },
+    "debian": {
+      "repo_setup": [
+        "npm install -g @anthropic-ai/claude-code"
+      ]
+    },
+    "fedora": {
+      "repo_setup": [
+        "npm install -g @anthropic-ai/claude-code"
+      ]
+    }
+  }
+}

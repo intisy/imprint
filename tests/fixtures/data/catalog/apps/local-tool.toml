@@ -1,0 +1,5 @@
+id = "local-tool"
+name = "Local Tool"
+
+[install.arch]
+packages = ["local-tool"]

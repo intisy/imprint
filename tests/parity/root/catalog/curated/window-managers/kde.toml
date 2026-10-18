@@ -1,0 +1,8 @@
+id = "kde"
+name = "KDE Plasma"
+type = "wayland"
+session = "display-manager"
+required_apps = ["kde-plasma"]
+dotfiles_directory = "kde"
+
+[config_files]

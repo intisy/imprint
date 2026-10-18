@@ -1,0 +1,22 @@
+{
+  "id": "go",
+  "name": "Go",
+  "category": "development",
+  "install": {
+    "arch": {
+      "packages": [
+        "go"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "golang-go"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "golang"
+      ]
+    }
+  }
+}

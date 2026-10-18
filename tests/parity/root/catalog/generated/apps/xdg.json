@@ -1,0 +1,24 @@
+{
+  "id": "xdg",
+  "name": "XDG utilities",
+  "category": "misc",
+  "install": {
+    "arch": {
+      "packages": [
+        "xdg-utils",
+        "xdg-user-dirs"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "xdg-utils"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "xdg-utils",
+        "xdg-user-dirs"
+      ]
+    }
+  }
+}

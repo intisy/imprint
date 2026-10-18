@@ -1,0 +1,25 @@
+{
+  "id": "editors-extra",
+  "name": "vim + nano",
+  "category": "development",
+  "install": {
+    "arch": {
+      "packages": [
+        "vim",
+        "nano"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "vim",
+        "nano"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "vim",
+        "nano"
+      ]
+    }
+  }
+}

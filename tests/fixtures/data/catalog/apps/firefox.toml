@@ -1,0 +1,6 @@
+id = "firefox"
+name = "Firefox"
+category = "browsers"
+
+[install.arch]
+packages = ["firefox", "firefox-i18n-de"]

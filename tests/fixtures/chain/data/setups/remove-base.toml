@@ -1,0 +1,5 @@
+distro = "arch"
+apps = ["git", "vim"]
+
+[remove]
+apps = ["vim"]

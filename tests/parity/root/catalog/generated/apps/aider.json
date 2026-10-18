@@ -1,0 +1,22 @@
+{
+  "id": "aider",
+  "name": "Aider",
+  "category": "ai",
+  "install": {
+    "arch": {
+      "aur": [
+        "python-aider-chat"
+      ]
+    },
+    "debian": {
+      "repo_setup": [
+        "python3 -m pip install --break-system-packages aider-chat"
+      ]
+    },
+    "fedora": {
+      "repo_setup": [
+        "python3 -m pip install aider-chat"
+      ]
+    }
+  }
+}

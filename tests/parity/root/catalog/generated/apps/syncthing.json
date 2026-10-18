@@ -1,0 +1,22 @@
+{
+  "id": "syncthing",
+  "name": "Syncthing",
+  "category": "utilities",
+  "install": {
+    "arch": {
+      "packages": [
+        "syncthing"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "syncthing"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "syncthing"
+      ]
+    }
+  }
+}

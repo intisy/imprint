@@ -1,0 +1,32 @@
+{
+  "id": "bluetooth",
+  "name": "Bluetooth",
+  "category": "networking",
+  "install": {
+    "arch": {
+      "packages": [
+        "bluez",
+        "bluez-utils",
+        "blueman"
+      ],
+      "services": [
+        "bluetooth"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "bluez",
+        "blueman"
+      ],
+      "services": [
+        "bluetooth"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "bluez",
+        "blueman"
+      ]
+    }
+  }
+}

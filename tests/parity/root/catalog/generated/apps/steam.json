@@ -1,0 +1,25 @@
+{
+  "id": "steam",
+  "name": "Steam",
+  "category": "media",
+  "install": {
+    "arch": {
+      "packages": [
+        "steam"
+      ],
+      "repo_setup": [
+        "grep -q '^\\[multilib\\]' /etc/pacman.conf || printf '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist\n' >> /etc/pacman.conf"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "steam-installer"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "steam"
+      ]
+    }
+  }
+}

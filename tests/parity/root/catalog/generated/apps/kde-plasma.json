@@ -1,0 +1,26 @@
+{
+  "id": "kde-plasma",
+  "name": "KDE Plasma",
+  "category": "desktop",
+  "install": {
+    "arch": {
+      "packages": [
+        "plasma-meta",
+        "sddm",
+        "konsole",
+        "dolphin"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "kde-plasma-desktop",
+        "sddm"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "@kde-desktop-environment"
+      ]
+    }
+  }
+}

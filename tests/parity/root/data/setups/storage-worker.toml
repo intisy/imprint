@@ -1,0 +1,15 @@
+distro = "arch"
+window_managers = []
+apps = ["ssh", "tailscale"]
+
+[extra_packages]
+arch = [
+    "rsync",
+    "smartmontools",
+    "ntfs-3g",
+    "exfatprogs",
+    "xfsprogs",
+    "e2fsprogs",
+    "hdparm",
+    "htop",
+]

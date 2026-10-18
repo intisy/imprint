@@ -1,0 +1,18 @@
+extends = "base"
+display_manager = "lightdm"
+apps = ["steam", "mangohud", "visual-studio-code", "obsidian", "tailscale", "local-tool"]
+extra_aur = ["yay-bin"]
+flatpaks = ["com.example.App"]
+extra_services = ["fstrim.timer"]
+user_services = ["syncthing.service"]
+
+[remove]
+apps = ["synaptic"]
+user_groups = ["docker"]
+
+[remove.extra_packages]
+arch = ["rsync"]
+
+[install]
+timezone = "Europe/Berlin"
+username = "finn"

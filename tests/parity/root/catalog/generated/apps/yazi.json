@@ -1,0 +1,26 @@
+{
+  "id": "yazi",
+  "name": "Yazi",
+  "category": "terminal",
+  "install": {
+    "arch": {
+      "aur": [
+        "yazi"
+      ]
+    },
+    "debian": {
+      "repo_setup": [
+        "wget -qO /tmp/yazi.zip https://github.com/sxyazi/yazi/releases/latest/download/yazi-x86_64-unknown-linux-gnu.zip",
+        "unzip -o /tmp/yazi.zip -d /tmp/yazi-extract",
+        "mv /tmp/yazi-extract/yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/"
+      ]
+    },
+    "fedora": {
+      "repo_setup": [
+        "wget -qO /tmp/yazi.zip https://github.com/sxyazi/yazi/releases/latest/download/yazi-x86_64-unknown-linux-gnu.zip",
+        "unzip -o /tmp/yazi.zip -d /tmp/yazi-extract",
+        "mv /tmp/yazi-extract/yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/"
+      ]
+    }
+  }
+}

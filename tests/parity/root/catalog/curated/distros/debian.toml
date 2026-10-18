@@ -1,0 +1,32 @@
+id = "debian"
+name = "Debian / Ubuntu / Mint / Pop!_OS"
+package_manager = "apt"
+persistence_label = "casper-rw"
+iso_match = ["ubuntu", "linuxmint", "debian", "pop-os", "elementary", "zorin"]
+installer = "debootstrap"
+initramfs_tool = "update-initramfs"
+kernel_packages = ["linux-image-generic"]
+
+[extra_sources]
+aur = false
+flatpak = true
+
+[[variants]]
+id = "debian"
+name = "Debian"
+iso_match = ["debian"]
+
+[[variants]]
+id = "ubuntu"
+name = "Ubuntu"
+iso_match = ["ubuntu"]
+
+[[variants]]
+id = "popos"
+name = "Pop!_OS"
+iso_match = ["pop-os", "pop_os", "popos"]
+
+[[variants]]
+id = "mint"
+name = "Linux Mint"
+iso_match = ["linuxmint", "mint"]

@@ -1,0 +1,2 @@
+distro = "arch"
+window_managers = ["i4"]

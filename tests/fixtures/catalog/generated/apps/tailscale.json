@@ -1,0 +1,3 @@
+{ "id": "tailscale", "name": "Tailscale", "category": "remote",
+  "install": { "arch": { "packages": ["tailscale"], "services": ["tailscaled.service"] },
+               "debian": { "packages": ["tailscale"] } } }

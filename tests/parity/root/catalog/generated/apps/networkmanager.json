@@ -1,0 +1,31 @@
+{
+  "id": "networkmanager",
+  "name": "NetworkManager",
+  "category": "networking",
+  "install": {
+    "arch": {
+      "packages": [
+        "networkmanager",
+        "network-manager-applet"
+      ],
+      "services": [
+        "NetworkManager"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "network-manager",
+        "network-manager-gnome"
+      ],
+      "services": [
+        "NetworkManager"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "NetworkManager",
+        "NetworkManager-applet"
+      ]
+    }
+  }
+}

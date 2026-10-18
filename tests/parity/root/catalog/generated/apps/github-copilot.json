@@ -1,0 +1,22 @@
+{
+  "id": "github-copilot",
+  "name": "GitHub Copilot CLI",
+  "category": "ai",
+  "install": {
+    "arch": {
+      "aur": [
+        "github-copilot-cli-bin"
+      ]
+    },
+    "debian": {
+      "repo_setup": [
+        "npm install -g @githubnext/github-copilot-cli"
+      ]
+    },
+    "fedora": {
+      "repo_setup": [
+        "npm install -g @githubnext/github-copilot-cli"
+      ]
+    }
+  }
+}

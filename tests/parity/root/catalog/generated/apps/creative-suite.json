@@ -1,0 +1,43 @@
+{
+  "id": "creative-suite",
+  "name": "Creative & media apps",
+  "category": "media",
+  "install": {
+    "arch": {
+      "packages": [
+        "gimp",
+        "inkscape",
+        "kdenlive",
+        "vlc",
+        "ffmpeg",
+        "imagemagick",
+        "yt-dlp",
+        "playerctl"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "gimp",
+        "inkscape",
+        "kdenlive",
+        "vlc",
+        "ffmpeg",
+        "imagemagick",
+        "yt-dlp",
+        "playerctl"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "gimp",
+        "inkscape",
+        "kdenlive",
+        "vlc",
+        "ffmpeg",
+        "ImageMagick",
+        "yt-dlp",
+        "playerctl"
+      ]
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "firefox",
+  "name": "Firefox",
+  "category": "browsers",
+  "install": {
+    "arch": {
+      "packages": [
+        "firefox"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "firefox"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "firefox"
+      ]
+    }
+  }
+}

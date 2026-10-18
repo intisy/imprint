@@ -1,0 +1,22 @@
+id = "fedora"
+name = "Fedora"
+package_manager = "dnf"
+persistence_label = "vtoycow"
+iso_match = ["fedora"]
+installer = "dnf"
+initramfs_tool = "dracut"
+kernel_packages = ["kernel"]
+
+[extra_sources]
+aur = false
+flatpak = true
+
+[[variants]]
+id = "fedora"
+name = "Fedora"
+iso_match = ["fedora"]
+
+[[variants]]
+id = "nobara"
+name = "Nobara"
+iso_match = ["nobara"]

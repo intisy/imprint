@@ -1,0 +1,37 @@
+{
+  "id": "zsh",
+  "name": "Zsh + plugins",
+  "category": "terminal",
+  "install": {
+    "arch": {
+      "packages": [
+        "zsh",
+        "zsh-completions",
+        "zsh-syntax-highlighting",
+        "zsh-autosuggestions"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "zsh",
+        "zsh-syntax-highlighting",
+        "zsh-autosuggestions"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "zsh",
+        "zsh-syntax-highlighting",
+        "zsh-autosuggestions"
+      ]
+    }
+  },
+  "config": {
+    "files": [
+      {
+        "path": "~/.zshrc",
+        "content": "HISTSIZE=10000\nSAVEHIST=10000\nHISTFILE=~/.zsh_history\nsetopt SHARE_HISTORY\nautoload -Uz compinit && compinit\ncommand -v starship >/dev/null && eval \"$(starship init zsh)\"\ncommand -v eza >/dev/null && alias ls='eza'\ncommand -v bat >/dev/null && alias cat='bat --paging=never'\n"
+      }
+    ]
+  }
+}

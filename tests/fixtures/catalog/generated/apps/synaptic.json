@@ -1,0 +1,1 @@
+{ "id": "synaptic", "name": "Synaptic", "category": "utilities", "install": { "debian": { "packages": ["synaptic"] } } }

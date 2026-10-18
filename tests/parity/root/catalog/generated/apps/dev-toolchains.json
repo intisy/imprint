@@ -1,0 +1,43 @@
+{
+  "id": "dev-toolchains",
+  "name": "Dev build toolchains",
+  "category": "development",
+  "install": {
+    "arch": {
+      "packages": [
+        "cmake",
+        "meson",
+        "ninja",
+        "gcc",
+        "clang",
+        "rust",
+        "go",
+        "git-lfs"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "cmake",
+        "meson",
+        "ninja-build",
+        "gcc",
+        "clang",
+        "rustc",
+        "golang",
+        "git-lfs"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "cmake",
+        "meson",
+        "ninja-build",
+        "gcc",
+        "clang",
+        "rust",
+        "golang",
+        "git-lfs"
+      ]
+    }
+  }
+}

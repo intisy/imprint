@@ -1,0 +1,6 @@
+id = "sway"
+name = "Sway"
+type = "wayland"
+session = "display-manager"
+required_apps = ["sway"]
+dotfiles_directory = "sway"

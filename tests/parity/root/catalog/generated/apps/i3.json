@@ -1,0 +1,58 @@
+{
+  "id": "i3",
+  "name": "i3",
+  "category": "desktop",
+  "install": {
+    "arch": {
+      "packages": [
+        "xorg-server",
+        "xorg-xinit",
+        "xorg-xrandr",
+        "xorg-xsetroot",
+        "i3-wm",
+        "i3status",
+        "i3lock",
+        "dmenu",
+        "alacritty",
+        "picom",
+        "feh",
+        "dunst"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "xorg",
+        "xinit",
+        "x11-xserver-utils",
+        "i3-wm",
+        "i3status",
+        "i3lock",
+        "dmenu",
+        "alacritty",
+        "picom",
+        "feh",
+        "dunst"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "xorg-x11-server-Xorg",
+        "xorg-x11-xinit",
+        "xrandr",
+        "i3",
+        "i3status",
+        "i3lock",
+        "dmenu",
+        "alacritty",
+        "picom",
+        "feh",
+        "dunst"
+      ]
+    }
+  },
+  "config_files": {
+    ".config/i3/config": "i3/config",
+    ".config/i3status/config": "i3status/config",
+    ".xinitrc": "xinitrc"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "id": "gnome-apps",
+  "name": "GNOME apps",
+  "category": "utilities",
+  "install": {
+    "arch": {
+      "packages": [
+        "gnome-calculator",
+        "gnome-calendar",
+        "gnome-clocks",
+        "gnome-system-monitor",
+        "gnome-text-editor",
+        "gnome-tweaks",
+        "dconf-editor"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "gnome-calculator",
+        "gnome-calendar",
+        "gnome-clocks",
+        "gnome-system-monitor",
+        "gnome-text-editor",
+        "gnome-tweaks",
+        "dconf-editor"
+      ]
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "obs-studio",
+  "name": "OBS Studio",
+  "category": "media",
+  "install": {
+    "arch": {
+      "packages": [
+        "obs-studio"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "obs-studio"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "obs-studio"
+      ]
+    }
+  }
+}

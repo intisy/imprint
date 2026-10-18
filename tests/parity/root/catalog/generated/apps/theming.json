@@ -1,0 +1,35 @@
+{
+  "id": "theming",
+  "name": "GTK/Qt themes & cursors",
+  "category": "theming",
+  "install": {
+    "arch": {
+      "packages": [
+        "arc-gtk-theme",
+        "gnome-themes-extra",
+        "adwaita-icon-theme",
+        "papirus-icon-theme",
+        "kvantum",
+        "qt5ct",
+        "qt6ct",
+        "lxappearance"
+      ],
+      "aur": [
+        "bibata-cursor-theme-bin",
+        "catppuccin-gtk-theme"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "arc-theme",
+        "gnome-themes-extra",
+        "adwaita-icon-theme",
+        "papirus-icon-theme",
+        "kvantum",
+        "qt5ct",
+        "qt6ct",
+        "lxappearance"
+      ]
+    }
+  }
+}

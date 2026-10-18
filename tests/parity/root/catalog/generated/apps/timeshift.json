@@ -1,0 +1,22 @@
+{
+  "id": "timeshift",
+  "name": "Timeshift",
+  "category": "utilities",
+  "install": {
+    "arch": {
+      "aur": [
+        "timeshift"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "timeshift"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "timeshift"
+      ]
+    }
+  }
+}

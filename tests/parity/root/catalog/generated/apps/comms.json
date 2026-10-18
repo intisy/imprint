@@ -1,0 +1,26 @@
+{
+  "id": "comms",
+  "name": "Messaging apps",
+  "category": "communication",
+  "install": {
+    "arch": {
+      "packages": [
+        "signal-desktop"
+      ],
+      "aur": [
+        "telegram-desktop-bin",
+        "teams-for-linux",
+        "element-desktop-bin"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "telegram-desktop"
+      ],
+      "flatpak": [
+        "im.riot.Riot",
+        "com.github.IsmaelMartinez.teams_for_linux"
+      ]
+    }
+  }
+}

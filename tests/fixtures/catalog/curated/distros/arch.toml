@@ -1,0 +1,9 @@
+id = "arch"
+name = "Arch Linux"
+package_manager = "pacman"
+persistence_label = "vtoycow"
+
+[[variants]]
+id = "endeavouros"
+name = "EndeavourOS"
+iso_match = ["endeavouros"]

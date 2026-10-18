@@ -1,0 +1,46 @@
+{
+  "id": "cli-extras",
+  "name": "Modern CLI tools",
+  "category": "terminal",
+  "install": {
+    "arch": {
+      "packages": [
+        "fish",
+        "bat",
+        "eza",
+        "fzf",
+        "fd",
+        "ranger",
+        "tldr",
+        "jq",
+        "fastfetch"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "fish",
+        "bat",
+        "eza",
+        "fzf",
+        "fd-find",
+        "ranger",
+        "tldr",
+        "jq",
+        "fastfetch"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "fish",
+        "bat",
+        "eza",
+        "fzf",
+        "fd-find",
+        "ranger",
+        "tldr",
+        "jq",
+        "fastfetch"
+      ]
+    }
+  }
+}

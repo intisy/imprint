@@ -1,0 +1,4 @@
+distro = "arch"
+
+[remove]
+extra_packages = ["htop"]

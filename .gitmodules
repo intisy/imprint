@@ -1,0 +1,6 @@
+[submodule "catalog"]
+	path = catalog
+	url = https://github.com/intisy/imprint-catalog.git
+[submodule "data"]
+	path = data
+	url = https://github.com/intisy/imprint-data-template.git

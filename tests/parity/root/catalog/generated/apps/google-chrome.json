@@ -1,0 +1,17 @@
+{
+  "id": "google-chrome",
+  "name": "Google Chrome",
+  "category": "browsers",
+  "install": {
+    "arch": {
+      "aur": [
+        "google-chrome-stable"
+      ]
+    },
+    "fedora": {
+      "flatpak": [
+        "com.google.Chrome"
+      ]
+    }
+  }
+}

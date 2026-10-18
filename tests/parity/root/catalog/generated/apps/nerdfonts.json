@@ -1,0 +1,33 @@
+{
+  "id": "nerdfonts",
+  "name": "Nerd Fonts (dev icons)",
+  "category": "fonts",
+  "install": {
+    "arch": {
+      "packages": [
+        "ttf-jetbrains-mono-nerd",
+        "ttf-firacode-nerd"
+      ]
+    },
+    "debian": {
+      "repo_setup": [
+        "wget -qO /tmp/JetBrainsMono.zip https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip",
+        "mkdir -p /usr/share/fonts/nerdfonts",
+        "unzip -o /tmp/JetBrainsMono.zip -d /usr/share/fonts/nerdfonts",
+        "wget -qO /tmp/FiraCode.zip https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip",
+        "unzip -o /tmp/FiraCode.zip -d /usr/share/fonts/nerdfonts",
+        "fc-cache -fv"
+      ]
+    },
+    "fedora": {
+      "repo_setup": [
+        "wget -qO /tmp/JetBrainsMono.zip https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip",
+        "mkdir -p /usr/share/fonts/nerdfonts",
+        "unzip -o /tmp/JetBrainsMono.zip -d /usr/share/fonts/nerdfonts",
+        "wget -qO /tmp/FiraCode.zip https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip",
+        "unzip -o /tmp/FiraCode.zip -d /usr/share/fonts/nerdfonts",
+        "fc-cache -fv"
+      ]
+    }
+  }
+}

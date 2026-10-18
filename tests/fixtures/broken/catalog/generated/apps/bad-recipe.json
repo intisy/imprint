@@ -1,0 +1,1 @@
+{ "id": "bad-recipe", "name": "Bad Recipe", "install": { "arch": { "pakages": ["x"] } } }

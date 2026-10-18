@@ -1,0 +1,17 @@
+{
+  "id": "ventoy",
+  "name": "Ventoy",
+  "category": "utilities",
+  "install": {
+    "arch": {
+      "aur": [
+        "ventoy-bin"
+      ]
+    },
+    "fedora": {
+      "repo_setup": [
+        "true  # no native Fedora package for ventoy; download from https://www.ventoy.net/"
+      ]
+    }
+  }
+}

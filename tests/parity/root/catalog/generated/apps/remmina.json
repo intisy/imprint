@@ -1,0 +1,25 @@
+{
+  "id": "remmina",
+  "name": "Remmina",
+  "category": "remote",
+  "install": {
+    "arch": {
+      "packages": [
+        "remmina",
+        "freerdp"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "remmina",
+        "remmina-plugin-rdp"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "remmina",
+        "freerdp"
+      ]
+    }
+  }
+}

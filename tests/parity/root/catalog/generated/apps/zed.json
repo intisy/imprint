@@ -1,0 +1,22 @@
+{
+  "id": "zed",
+  "name": "Zed",
+  "category": "development",
+  "install": {
+    "arch": {
+      "aur": [
+        "zed-editor-bin"
+      ]
+    },
+    "debian": {
+      "repo_setup": [
+        "curl -fsSL https://zed.dev/install.sh | sh"
+      ]
+    },
+    "fedora": {
+      "repo_setup": [
+        "curl -fsSL https://zed.dev/install.sh | sh"
+      ]
+    }
+  }
+}

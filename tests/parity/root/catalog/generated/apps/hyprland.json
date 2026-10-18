@@ -1,0 +1,21 @@
+{
+  "id": "hyprland",
+  "name": "Hyprland",
+  "category": "desktop",
+  "install": {
+    "arch": {
+      "packages": [
+        "hyprland",
+        "hyprpaper",
+        "waybar",
+        "wofi",
+        "alacritty"
+      ]
+    },
+    "fedora": {
+      "repo_setup": [
+        "true  # no native Fedora package for hyprland; install manually or via copr"
+      ]
+    }
+  }
+}

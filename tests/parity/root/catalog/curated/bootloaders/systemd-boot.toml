@@ -1,0 +1,6 @@
+id = "systemd-boot"
+name = "systemd-boot"
+install_command = "bootctl install"
+config_path = "/boot/loader/loader.conf"
+mkconfig_command = ""
+notes = "UEFI only; entries in /boot/loader/entries"

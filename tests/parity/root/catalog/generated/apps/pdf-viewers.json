@@ -1,0 +1,28 @@
+{
+  "id": "pdf-viewers",
+  "name": "PDF/document viewers",
+  "category": "utilities",
+  "install": {
+    "arch": {
+      "packages": [
+        "evince",
+        "okular",
+        "zathura"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "evince",
+        "okular",
+        "zathura"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "evince",
+        "okular",
+        "zathura"
+      ]
+    }
+  }
+}

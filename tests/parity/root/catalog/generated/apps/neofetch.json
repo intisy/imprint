@@ -1,0 +1,22 @@
+{
+  "id": "neofetch",
+  "name": "neofetch",
+  "category": "utilities",
+  "install": {
+    "arch": {
+      "packages": [
+        "neofetch"
+      ]
+    },
+    "debian": {
+      "packages": [
+        "neofetch"
+      ]
+    },
+    "fedora": {
+      "packages": [
+        "neofetch"
+      ]
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "rust",
+  "name": "Rust (rustup)",
+  "category": "development",
+  "install": {
+    "arch": {
+      "packages": [
+        "rustup"
+      ]
+    },
+    "debian": {
+      "repo_setup": [
+        "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+      ]
+    },
+    "fedora": {
+      "repo_setup": [
+        "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+      ]
+    }
+  }
+}
