@@ -44,18 +44,6 @@ bool string_list_add_unique(string_list *list, const char *text) {
     return true;
 }
 
-void string_list_remove_all(string_list *list, const char *text) {
-    size_t kept = 0;
-    for (size_t index = 0; index < list->count; index++) {
-        if (strcmp(list->items[index], text) == 0) {
-            free(list->items[index]);
-        } else {
-            list->items[kept++] = list->items[index];
-        }
-    }
-    list->count = kept;
-}
-
 void string_list_reverse(string_list *list) {
     for (size_t front = 0, back = list->count; front + 1 < back; front++, back--) {
         char *swapped = list->items[front];
