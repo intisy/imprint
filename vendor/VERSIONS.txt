@@ -1,0 +1,2 @@
+name       upstream                              pinned at                                                   licence
+utest.h    https://github.com/sheredom/utest.h   commit 706f3574fec4915e78d9234870cfcdf22f7af5d9             Unlicense (in the header)
