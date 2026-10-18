@@ -55,6 +55,7 @@ static cli_result run(const char *const *arguments, size_t count, fake_git *fake
         cli_result result = run(arguments, COUNT_OF(arguments), &fake);                                  \
         ASSERT_EQ(IMPRINT_EXIT_USAGE, result.exit_code);                                                 \
         ASSERT_EQ((size_t)0, fake.commands.count);                                                       \
+        ASSERT_TRUE(strstr(result.error_output, "is not owner/repo[@ref] or a git URL") != NULL);        \
         ASSERT_TRUE(strstr(result.error_output, "usage:") != NULL);                                      \
         cli_result_free(&result);                                                                        \
         string_list_free(&fake.commands);                                                                \
@@ -136,6 +137,26 @@ UTEST(cli_git, an_option_hidden_in_a_url_never_reaches_git) {
     ASSERT_SOURCE_REFUSED("--upload-pack=ssh://host/repo");
 }
 
+UTEST(cli_git, an_option_right_after_the_scheme_is_refused) {
+    ASSERT_SOURCE_REFUSED("ssh://-oProxyCommand=x/repo");
+}
+
+UTEST(cli_git, an_option_right_after_the_git_at_sign_is_refused) {
+    ASSERT_SOURCE_REFUSED("git@-oProxyCommand=x:owner/repo");
+}
+
+UTEST(cli_git, a_template_url_that_is_an_option_stops_with_exit_3) {
+    const char *const outputs[] = { "git version 2.47.0\n", "--upload-pack=x\n" };
+    fake_git fake = fake_with(outputs, COUNT_OF(outputs), SIZE_MAX);
+    const char *const arguments[] = { "imprint", "--root", ROOT, "data", "use" };
+    cli_result result = run(arguments, COUNT_OF(arguments), &fake);
+    ASSERT_EQ(IMPRINT_EXIT_ENVIRONMENT, result.exit_code);
+    ASSERT_EQ((size_t)2, fake.commands.count);
+    ASSERT_TRUE(strstr(result.error_output, ".gitmodules") != NULL);
+    cli_result_free(&result);
+    string_list_free(&fake.commands);
+}
+
 UTEST(cli_git, a_source_with_a_second_slash_is_refused) {
     ASSERT_SOURCE_REFUSED("owner/repo/extra");
 }
@@ -206,6 +227,19 @@ UTEST(cli_git, a_catalog_that_does_not_validate_is_rolled_back) {
     ASSERT_EQ(IMPRINT_EXIT_INVALID, result.exit_code);
     ASSERT_STREQ("git -C " ROOT "/broken/catalog checkout -q 1111111aaaa", fake.commands.items[6]);
     ASSERT_TRUE(strstr(result.error_output, "kept the catalog at 1111111") != NULL);
+    cli_result_free(&result);
+    string_list_free(&fake.commands);
+}
+
+UTEST(cli_git, a_failed_rollback_is_exit_3_and_says_where_the_catalog_is) {
+    const char *const outputs[] = { "git version 2.47.0\n", "", "1111111aaaa\n", "", "", "2222222bbbb\n" };
+    fake_git fake = fake_with(outputs, COUNT_OF(outputs), 6);
+    const char *const arguments[] = { "imprint", "--root", ROOT "/broken", "catalog", "update" };
+    cli_result result = run(arguments, COUNT_OF(arguments), &fake);
+    ASSERT_EQ(IMPRINT_EXIT_ENVIRONMENT, result.exit_code);
+    ASSERT_TRUE(strstr(result.error_output, "the catalog is still at 2222222") != NULL);
+    ASSERT_TRUE(strstr(result.error_output, "checkout 1111111aaaa") != NULL);
+    ASSERT_TRUE(strstr(result.error_output, "kept the catalog") == NULL);
     cli_result_free(&result);
     string_list_free(&fake.commands);
 }

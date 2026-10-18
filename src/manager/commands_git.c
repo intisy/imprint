@@ -120,7 +120,7 @@ static bool is_owner_and_repository(const char *location) {
            is_name_text(location, (size_t)(slash - location), "-") && is_name_text(slash + 1, strlen(slash + 1), "-_.");
 }
 
-/** @implNote A leading - would make git read the URL as an option, and only these two forms name a remote. */
+/** @implNote A - at the start, or right after the scheme or git@, would be read by git or ssh as an option; only these two forms name a remote. */
 static bool is_git_url(const char *text) {
     if (text[0] == '-' || text[0] == '\0') {
         return false;
@@ -130,7 +130,11 @@ static bool is_git_url(const char *text) {
             return false;
         }
     }
-    return strstr(text, "://") != NULL || strncmp(text, "git@", 4) == 0;
+    const char *scheme_end = strstr(text, "://");
+    if (scheme_end != NULL) {
+        return scheme_end[3] != '-';
+    }
+    return strncmp(text, "git@", 4) == 0 && text[4] != '-';
 }
 
 /** @implNote The reference is split at an @ after the last slash, so the @ in git@host:owner/repo stays in the URL. */
@@ -240,7 +244,12 @@ static int check_new_catalog(const char *catalog_directory, const char *data_dir
     catalog_free(&available);
     if (!valid) {
         const char *const back[] = { "git", "-C", catalog_directory, "checkout", "-q", previous, NULL };
-        run_git(context, back, NULL, errors);
+        if (!run_git(context, back, NULL, errors)) {
+            error_push(errors, NULL, 0,
+                       "the catalog is still at %.*s and does not validate with your data: run git -C %s checkout %s",
+                       SHORT_COMMIT_LENGTH, current, catalog_directory, previous);
+            return IMPRINT_EXIT_ENVIRONMENT;
+        }
         error_push(errors, NULL, 0, "kept the catalog at %.*s: the newest catalog does not validate with your data",
                    SHORT_COMMIT_LENGTH, previous);
         return IMPRINT_EXIT_INVALID;
