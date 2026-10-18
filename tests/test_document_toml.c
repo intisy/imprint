@@ -76,13 +76,26 @@ UTEST(toml, dates_are_refused_with_their_key) {
 }
 
 UTEST(toml, byte_order_mark_and_crlf_load_like_lf) {
-    error_list errors;
-    error_list_init(&errors);
-    document_node *windows = parse("\xEF\xBB\xBF" "distro = \"arch\"\r\napps = [\"git\"]\r\n", &errors);
-    document_node *unix_text = parse("distro = \"arch\"\napps = [\"git\"]\n", &errors);
-    ASSERT_EQ((size_t)0, errors.count);
+    error_list windows_errors;
+    error_list unix_errors;
+    error_list_init(&windows_errors);
+    error_list_init(&unix_errors);
+    document_node *windows = parse("\xEF\xBB\xBF" "distro = \"arch\"\r\napps = [\"git\"]\r\n", &windows_errors);
+    document_node *unix_text = parse("distro = \"arch\"\napps = [\"git\"]\n", &unix_errors);
+    ASSERT_EQ((size_t)0, windows_errors.count);
+    ASSERT_EQ((size_t)0, unix_errors.count);
     ASSERT_TRUE(windows != NULL);
+    ASSERT_TRUE(unix_text != NULL);
     ASSERT_TRUE(document_equal(windows, unix_text));
     document_free(windows);
     document_free(unix_text);
+}
+
+UTEST(toml, string_with_a_nul_character_is_refused_with_its_key) {
+    error_list errors;
+    error_list_init(&errors);
+    ASSERT_TRUE(parse("[install]\nname = \"a\\u0000b\"\n", &errors) == NULL);
+    ASSERT_EQ((size_t)1, errors.count);
+    ASSERT_TRUE(error_list_mentions(&errors, "install.name: contains a NUL character"));
+    error_list_free(&errors);
 }

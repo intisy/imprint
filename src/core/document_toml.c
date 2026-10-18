@@ -32,9 +32,18 @@ static char *key_path(const char *path, const char *key) {
     return path[0] == '\0' ? text_duplicate(key) : text_format("%s.%s", path, key);
 }
 
+static document_node *refuse_nul(const char *file, int line, const char *path, error_list *errors) {
+    error_push(errors, file, line, "%s: contains a NUL character, which is not supported", path);
+    return NULL;
+}
+
 static document_node *convert_table(toml_datum_t table, const char *file, const char *path, error_list *errors) {
     document_node *node = document_new_table(file, table.lineno);
     for (int index = 0; index < (int)table.u.tab.size; index++) {
+        if (strlen(table.u.tab.key[index]) != (size_t)table.u.tab.len[index]) {
+            document_free(node);
+            return refuse_nul(file, table.u.tab.value[index].lineno, path[0] == '\0' ? "(key)" : path, errors);
+        }
         char *child_path = key_path(path, table.u.tab.key[index]);
         document_node *child = convert_datum(table.u.tab.value[index], file, child_path, errors);
         free(child_path);
@@ -65,6 +74,9 @@ static document_node *convert_array(toml_datum_t array, const char *file, const 
 static document_node *convert_datum(toml_datum_t datum, const char *file, const char *path, error_list *errors) {
     switch (datum.type) {
     case TOML_STRING:
+        if (strlen(datum.u.str.ptr) != (size_t)datum.u.str.len) {
+            return refuse_nul(file, datum.lineno, path, errors);
+        }
         return document_new_string(datum.u.s, file, datum.lineno);
     case TOML_INT64:
         return document_new_integer((long long)datum.u.int64, file, datum.lineno);

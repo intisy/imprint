@@ -190,4 +190,8 @@ UTEST(document, remove_by_key_and_by_index) {
 UTEST(document, skip_byte_order_mark) {
     ASSERT_STREQ("distro", document_skip_byte_order_mark("\xEF\xBB\xBF" "distro"));
     ASSERT_STREQ("distro", document_skip_byte_order_mark("distro"));
+    ASSERT_STREQ("", document_skip_byte_order_mark("\xEF\xBB\xBF"));
+    ASSERT_STREQ("", document_skip_byte_order_mark(""));
+    ASSERT_STREQ("\xEF", document_skip_byte_order_mark("\xEF"));
+    ASSERT_STREQ("\xEF\xBB", document_skip_byte_order_mark("\xEF\xBB"));
 }
