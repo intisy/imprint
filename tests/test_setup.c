@@ -189,3 +189,13 @@ UTEST(setup, load_refuses_a_bad_name_and_a_missing_setup) {
     ASSERT_TRUE(error_list_mentions(&errors, "no setup 'ghost' in"));
     error_list_free(&errors);
 }
+
+UTEST(setup, load_confirms_the_exact_file_name) {
+    error_list errors;
+    error_list_init(&errors);
+    ASSERT_FALSE(load_broken("workstation", &errors));
+    ASSERT_TRUE(error_list_mentions(&errors, "no setup 'workstation' in"));
+    ASSERT_FALSE(setup_file_exists(BROKEN, "workstation"));
+    ASSERT_TRUE(setup_file_exists(BROKEN, "workstation-arch"));
+    error_list_free(&errors);
+}

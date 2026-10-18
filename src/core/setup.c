@@ -28,6 +28,21 @@ char *setup_path(const char *data_directory, const char *name) {
     return path;
 }
 
+bool setup_file_exists(const char *data_directory, const char *name) {
+    char *directory = setups_directory(data_directory);
+    char *file_name = text_format("%s.toml", name);
+    string_list files;
+    string_list_init(&files);
+    error_list ignored;
+    error_list_init(&ignored);
+    bool exists = platform_list_files(directory, &files, &ignored) && string_list_contains(&files, file_name);
+    error_list_free(&ignored);
+    string_list_free(&files);
+    free(file_name);
+    free(directory);
+    return exists;
+}
+
 bool setup_list(const char *data_directory, string_list *names, error_list *errors) {
     char *directory = setups_directory(data_directory);
     if (!platform_is_directory(directory)) {
@@ -138,7 +153,7 @@ static bool refuse_cycle(const char *name, const document_node *extends_node, st
 static document_node *read_own(const char *data_directory, const char *name, const document_node *extends_node,
                                error_list *errors) {
     char *path = setup_path(data_directory, name);
-    if (!platform_is_file(path)) {
+    if (!setup_file_exists(data_directory, name)) {
         if (extends_node == NULL) {
             char *directory = setups_directory(data_directory);
             error_push(errors, NULL, 0, "no setup '%s' in %s", name, directory);

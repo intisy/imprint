@@ -69,13 +69,6 @@ static void print_summary(const setup *loaded, const resolved_setup *resolved, F
     }
 }
 
-static bool setup_file_exists(const char *data_directory, const char *name) {
-    char *path = setup_path(data_directory, name);
-    bool exists = platform_is_file(path);
-    free(path);
-    return exists;
-}
-
 static void suggest_setups(const char *data_directory, cli_context *context) {
     string_list names;
     string_list_init(&names);
