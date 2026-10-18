@@ -1,0 +1,4 @@
+distro = "arch"
+
+[remove]
+apps = "git"

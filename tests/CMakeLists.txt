@@ -10,6 +10,7 @@ set(IMPRINT_TEST_SOURCES
     test_platform.c
     test_catalog.c
     test_setup_merge.c
+    test_setup.c
 )
 
 add_executable(imprint-tests ${IMPRINT_TEST_SOURCES})

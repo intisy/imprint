@@ -1,0 +1,3 @@
+extends = "chain-c"
+display_manager = "lightdm"
+apps = ["vim"]
