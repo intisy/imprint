@@ -168,6 +168,32 @@ UTEST(resolve, an_unknown_key_is_refused) {
     ASSERT_TRUE(is_refused_with(document, "unknown key 'extra'"));
 }
 
+UTEST(resolve, install_choices_survive_json) {
+    char document[1024];
+    snprintf(document, sizeof document, COMPLETE_DOCUMENT,
+             ", \"choices\": {\"storage\": {\"node\": \"data-disk\", \"path\": \"/data\", \"threshold\": 50}}");
+    resolved_setup resolved;
+    resolved_setup again;
+    error_list errors;
+    error_list_init(&errors);
+    ASSERT_TRUE(resolved_setup_from_json(document, "hand-over.json", &resolved, &errors));
+    char *json = resolved_setup_to_json(&resolved);
+    ASSERT_TRUE(resolved_setup_from_json(json, "again.json", &again, &errors));
+    ASSERT_TRUE(again.choices != NULL);
+    ASSERT_TRUE(document_equal(resolved.choices, again.choices));
+    ASSERT_STREQ("/data", document_get(document_get(again.choices, "storage"), "path")->string_value);
+    free(json);
+    resolved_setup_free(&resolved);
+    resolved_setup_free(&again);
+    error_list_free(&errors);
+}
+
+UTEST(resolve, choices_that_are_not_an_object_are_refused) {
+    char document[1024];
+    snprintf(document, sizeof document, COMPLETE_DOCUMENT, ", \"choices\": 1");
+    ASSERT_TRUE(is_refused_with(document, "choices"));
+}
+
 UTEST(resolve, a_missing_format_is_reported_as_missing) {
     ASSERT_TRUE(is_refused_with("{\"name\": \"n\", \"setup\": {}}", "missing required key 'format'"));
 }

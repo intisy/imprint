@@ -100,6 +100,7 @@ void resolved_setup_free(resolved_setup *resolved) {
     }
     dotfiles_free(&resolved->dotfiles);
     document_free(resolved->setup);
+    document_free(resolved->choices);
     resolved_setup_init(resolved);
 }
 
@@ -303,6 +304,9 @@ char *resolved_setup_to_json(const resolved_setup *resolved) {
     }
     document_table_set(root, "dotfiles", dotfiles);
     document_table_set(root, "setup", resolved->setup == NULL ? document_new_table(NULL, 0) : document_clone(resolved->setup));
+    if (resolved->choices != NULL) {
+        document_table_set(root, "choices", document_clone(resolved->choices));
+    }
     char *json = document_to_json(root);
     document_free(root);
     return json;
@@ -327,7 +331,8 @@ static bool read_format(const document_node *root, error_list *errors) {
 }
 
 static bool is_resolved_key(const char *key) {
-    if (strcmp(key, "format") == 0 || strcmp(key, "setup") == 0 || strcmp(key, "dotfiles") == 0) {
+    if (strcmp(key, "format") == 0 || strcmp(key, "setup") == 0 || strcmp(key, "dotfiles") == 0 ||
+        strcmp(key, "choices") == 0) {
         return true;
     }
     for (size_t index = 0; index < COUNT_OF(TEXT_FIELDS); index++) {
@@ -417,6 +422,12 @@ bool resolved_setup_from_json(const char *text, const char *file, resolved_setup
         resolved->setup = document_clone(setup_table);
     } else if (valid) {
         document_error(errors, root, "missing required key 'setup'");
+        valid = false;
+    }
+    const document_node *choices = NULL;
+    if (valid && document_optional_table(root, "choices", &choices, errors)) {
+        resolved->choices = choices == NULL ? NULL : document_clone(choices);
+    } else {
         valid = false;
     }
     document_free(root);

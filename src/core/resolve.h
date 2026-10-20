@@ -32,6 +32,8 @@ typedef struct resolved_setup {
     string_list skipped;
     dotfile_list dotfiles;
     document_node *setup;
+    /** What the person chose at install, such as `storage`; NULL until an install review fills it. */
+    document_node *choices;
 } resolved_setup;
 
 void resolved_setup_init(resolved_setup *resolved);
