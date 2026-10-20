@@ -48,10 +48,10 @@ static int run_with(run_fixture *fixture, const char *const *answers, size_t cou
     return exit_code;
 }
 
-UTEST(install_run, a_blank_disk_installs_in_order_with_both_grub_paths) {
+UTEST(install_run, two_disks_install_in_order_with_both_grub_paths) {
     run_fixture fixture;
     fixture_open(&fixture, "run-blank");
-    const char *const answers[] = { "5", "pass word", "pass word", "1" };
+    const char *const answers[] = { "5", "pass word", "pass word", "1", "nvme1n1" };
     ui *screen = NULL;
     error_list errors;
     error_list_init(&errors);
@@ -68,6 +68,8 @@ UTEST(install_run, a_blank_disk_installs_in_order_with_both_grub_paths) {
                                   fixture.target);
     char *unmount = text_format("umount -R %s", fixture.target);
     ASSERT_TRUE(partition >= 0 && pacstrap > partition && fstab > pacstrap);
+    ASSERT_TRUE(fake_runner_ran(&fixture.runner, "sgdisk -n 1:0:0 -t 1:8300 -c 1:data /dev/nvme1n1"));
+    ASSERT_TRUE(strstr(ui_scripted_transcript(screen), "labelled as a data partition") != NULL);
     ASSERT_TRUE(fake_runner_index(&fixture.runner, entry) > fstab);
     ASSERT_TRUE(fake_runner_index(&fixture.runner, removable) > fake_runner_index(&fixture.runner, entry));
     ASSERT_TRUE(fake_runner_index(&fixture.runner, unmount) > fake_runner_index(&fixture.runner, removable));
@@ -99,14 +101,13 @@ UTEST(install_run, start_without_a_password_shows_the_screen_again) {
 UTEST(install_run, a_used_disk_needs_its_name_typed) {
     run_fixture fixture;
     fixture_open(&fixture, "run-used");
-    const char *const answers[] = { "2", "2", "5", "pw", "pw", "1", "sdX" };
+    const char *const answers[] = { "5", "pw", "pw", "1", "sdX" };
     ui *screen = NULL;
     error_list errors;
     error_list_init(&errors);
     int exit_code = run_with(&fixture, answers, COUNT_OF(answers), &screen, &errors);
     ASSERT_EQ(IMPRINT_EXIT_USAGE, exit_code);
-    ASSERT_TRUE(error_list_mentions(&errors, "/dev/sdb is not empty and its name was not typed"));
-    ASSERT_TRUE(strstr(ui_scripted_transcript(screen), "labelled as a data partition") != NULL);
+    ASSERT_TRUE(error_list_mentions(&errors, "/dev/nvme1n1 is not empty and its name was not typed"));
     ASSERT_EQ(-1L, fake_runner_index(&fixture.runner, "sgdisk"));
     ui_destroy(screen);
     error_list_free(&errors);
@@ -127,12 +128,27 @@ UTEST(install_run, the_stick_cannot_be_chosen_on_the_review_screen) {
     fixture_close(&fixture);
 }
 
+UTEST(install_run, the_system_disk_cannot_also_hold_the_data) {
+    run_fixture fixture;
+    fixture_open(&fixture, "run-same-disk");
+    const char *const answers[] = { "5", "pw", "pw", "10", "6", "cancel" };
+    ui *screen = NULL;
+    error_list errors;
+    error_list_init(&errors);
+    run_with(&fixture, answers, COUNT_OF(answers), &screen, &errors);
+    ASSERT_TRUE(strstr(ui_scripted_transcript(screen), "is the system disk") != NULL);
+    ASSERT_EQ(-1L, fake_runner_index(&fixture.runner, "sgdisk"));
+    ui_destroy(screen);
+    error_list_free(&errors);
+    fixture_close(&fixture);
+}
+
 UTEST(install_run, a_disk_swapped_after_the_review_is_refused) {
     run_fixture fixture;
     fixture_open(&fixture, "run-swapped");
     char *swapped = text_duplicate(fixture.lsblk);
-    char *serial = strstr(swapped, "S6P7NF0T123456");
-    memcpy(serial, "XXXXXXXXXXXXXX", 14);
+    char *serial = strstr(swapped, "WD1TB0001");
+    memcpy(serial, "XXXXXXXXX", 9);
     const char *const answers[] = { "5", "pw", "pw", "1" };
     ui *screen = ui_scripted_create(answers, COUNT_OF(answers));
     error_list errors;

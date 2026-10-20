@@ -73,32 +73,61 @@ static void find_stick(install_session *session, error_list *errors) {
                session->stick.personal != NULL ? session->stick.personal : "absent");
 }
 
-static void choose_default_disk(install_session *session) {
-    if (session->request->disk != NULL) {
-        install_options_replace(&session->options.disk, session->request->disk);
-        return;
+static unsigned long long system_minimum_bytes(const install_options *options) {
+    enum { DEFAULT_ROOT_MINIMUM_MB = 65536 };
+    long long root = options->offered_root_size_mb > 0 ? options->offered_root_size_mb : DEFAULT_ROOT_MINIMUM_MB;
+    return (unsigned long long)(options->esp_size_mb + options->swap_size_mb + root) * 1024ULL * 1024ULL;
+}
+
+/** With a data partition and a second internal disk, the system goes on the smaller and the data on the larger. */
+static void choose_default_disks(install_session *session) {
+    install_options *options = &session->options;
+    const disk *system = NULL;
+    const disk *data = NULL;
+    if (session->request->disk == NULL) {
+        disks_default_pair(&session->disks, session->stick_disk, system_minimum_bytes(options), &system, &data);
     }
-    const disk *best = disks_default_target(&session->disks, session->stick_disk);
-    install_options_replace(&session->options.disk, best == NULL ? NULL : best->path);
+    install_options_replace(&options->disk, session->request->disk != NULL ? session->request->disk
+                                            : system == NULL ? NULL : system->path);
+    const char *data_disk = session->request->data_disk != NULL ? session->request->data_disk
+                            : data == NULL ? NULL : data->path;
+    if (data_disk != NULL && options->data_label != NULL) {
+        install_options_use_data_disk(options, data_disk);
+    }
 }
 
 /** @implNote The disk list is read again right before writing, so a disk swapped during the review is refused. */
-static bool confirm_target(install_session *session, error_list *errors) {
-    const disk *reviewed = disks_find(&session->disks, session->options.disk);
+static bool confirm_erase(install_session *session, const char *path, error_list *errors) {
+    const disk *reviewed = disks_find(&session->disks, path);
     if (!install_confirm_erase(session->request->screen, reviewed, session->options.offered_data_label)) {
-        error_push(errors, NULL, 0, "%s is not empty and its name was not typed: nothing was changed",
-                   session->options.disk);
+        error_push(errors, NULL, 0, "%s is not empty and its name was not typed: nothing was changed", path);
+        return false;
+    }
+    return true;
+}
+
+static bool unchanged_since_review(install_session *session, const disk_list *now, const char *path,
+                                   error_list *errors) {
+    bool same = disk_same_identity(disks_find(&session->disks, path), disks_find(now, path)) &&
+                disk_check_target(now, path, session->stick_disk, errors);
+    if (!same) {
+        error_push(errors, NULL, 0, "%s changed since the review (another disk, serial or size): nothing was changed",
+                   path);
+    }
+    return same;
+}
+
+static bool confirm_target(install_session *session, error_list *errors) {
+    const char *data_disk = session->options.data_disk;
+    if (!confirm_erase(session, session->options.disk, errors) ||
+        (data_disk != NULL && !confirm_erase(session, data_disk, errors))) {
         return false;
     }
     disk_list now;
     disk_list_init(&now);
     bool same = disks_read(session->request->runner, &now, errors) &&
-                disk_same_identity(reviewed, disks_find(&now, session->options.disk)) &&
-                disk_check_target(&now, session->options.disk, session->stick_disk, errors);
-    if (!same) {
-        error_push(errors, NULL, 0, "%s changed since the review (another disk, serial or size): nothing was changed",
-                   session->options.disk);
-    }
+                unchanged_since_review(session, &now, session->options.disk, errors) &&
+                (data_disk == NULL || unchanged_since_review(session, &now, data_disk, errors));
     disk_list_free(&now);
     return same;
 }
@@ -214,7 +243,7 @@ int install_run(const install_request *request, error_list *errors) {
         find_stick(&session, errors);
         exit_code = IMPRINT_EXIT_ENVIRONMENT;
         if (disks_read(request->runner, &session.disks, errors)) {
-            choose_default_disk(&session);
+            choose_default_disks(&session);
             exit_code = IMPRINT_EXIT_USAGE;
             if (!install_review(request->screen, &session.options, &session.disks, session.stick_disk)) {
                 error_push(errors, NULL, 0, "the install was cancelled: nothing was changed");

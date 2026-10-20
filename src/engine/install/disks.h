@@ -44,6 +44,13 @@ char *disks_holding_directory(command_runner *runner, const char *directory, err
 /** The largest writable internal disk that is not the stick, or NULL when there is none. */
 const disk *disks_default_target(const disk_list *disks, const char *stick_disk);
 
+/**
+ * With two or more internal disks: the smallest that holds the system as *system and the largest other as *data.
+ * With one: that disk as *system and *data NULL.
+ */
+void disks_default_pair(const disk_list *disks, const char *stick_disk, unsigned long long system_minimum,
+                        const disk **system, const disk **data);
+
 bool disk_holds_anything(const disk *candidate);
 bool disk_holds_label(const disk *candidate, const char *label);
 

@@ -27,7 +27,10 @@ char *layout_describe(const install_options *options) {
     char *layout = text_format("ESP %lldM, swap %lldM, root %s (%s)", options->esp_size_mb, options->swap_size_mb, root,
                                root_filesystem_name(options->root_fs));
     if (options->data_label != NULL) {
-        char *longer = text_format("%s, %s rest at %s", layout, options->data_label, options->data_mount);
+        char *longer = options->data_disk != NULL
+                           ? text_format("%s; %s on all of %s at %s", layout, options->data_label, options->data_disk,
+                                         options->data_mount)
+                           : text_format("%s, %s rest at %s", layout, options->data_label, options->data_mount);
         free(layout);
         layout = longer;
     }
@@ -44,6 +47,31 @@ static bool run_or_fail(command_runner *runner, const char *const *arguments, co
         error_push(errors, NULL, 0, "%s failed (%s exited with %d)", what, arguments[0], status);
     }
     return false;
+}
+
+char *layout_data_partition(const install_options *options) {
+    return options->data_disk != NULL ? partition_path(options->data_disk, 1)
+                                      : partition_path(options->disk, LAYOUT_DATA);
+}
+
+static bool has_data_on_system_disk(const install_options *options) {
+    return options->data_label != NULL && options->data_disk == NULL;
+}
+
+static bool partition_data_disk(command_runner *runner, const install_options *options, error_list *errors) {
+    char *name = text_format("1:%s", options->data_label);
+    const char *const wipe[] = { "wipefs", "-a", options->data_disk, NULL };
+    const char *const zap[] = { "sgdisk", "-Z", options->data_disk, NULL };
+    const char *const create[] = { "sgdisk", "-n", "1:0:0", "-t", "1:8300", "-c", name, options->data_disk, NULL };
+    const char *const probe[] = { "partprobe", options->data_disk, NULL };
+    bool partitioned = run_or_fail(runner, wipe, "wiping the data disk", errors) &&
+                       run_or_fail(runner, zap, "clearing the data disk's partition table", errors) &&
+                       run_or_fail(runner, create, "partitioning the data disk", errors);
+    if (partitioned) {
+        runner_run(runner, probe, errors);
+    }
+    free(name);
+    return partitioned;
 }
 
 bool layout_partition(command_runner *runner, const install_options *options, error_list *errors) {
@@ -64,8 +92,9 @@ bool layout_partition(command_runner *runner, const install_options *options, er
                                          options->disk, NULL };
     bool partitioned = run_or_fail(runner, wipe, "wiping the disk", errors) &&
                        run_or_fail(runner, zap, "clearing the partition table", errors) &&
-                       run_or_fail(runner, options->data_label == NULL ? without_data : with_data, "partitioning",
-                                   errors);
+                       run_or_fail(runner, has_data_on_system_disk(options) ? with_data : without_data, "partitioning",
+                                   errors) &&
+                       (options->data_disk == NULL || partition_data_disk(runner, options, errors));
     if (partitioned) {
         const char *const probe[] = { "partprobe", options->disk, NULL };
         const char *const settle[] = { "udevadm", "settle", NULL };
@@ -98,7 +127,7 @@ bool layout_format(command_runner *runner, const install_options *options, error
     char *esp = partition_path(options->disk, LAYOUT_ESP);
     char *swap = partition_path(options->disk, LAYOUT_SWAP);
     char *root = partition_path(options->disk, LAYOUT_ROOT);
-    char *data = partition_path(options->disk, LAYOUT_DATA);
+    char *data = layout_data_partition(options);
     const char *const fat[] = { "mkfs.fat", "-F", "32", "-n", "ESP", esp, NULL };
     const char *const make_swap[] = { "mkswap", swap, NULL };
     bool formatted = run_or_fail(runner, fat, "formatting the ESP", errors) &&
@@ -172,7 +201,7 @@ bool layout_mount(command_runner *runner, const install_options *options, const 
     char *esp = partition_path(options->disk, LAYOUT_ESP);
     char *swap = partition_path(options->disk, LAYOUT_SWAP);
     char *root = partition_path(options->disk, LAYOUT_ROOT);
-    char *data = partition_path(options->disk, LAYOUT_DATA);
+    char *data = layout_data_partition(options);
     const char *const swap_on[] = { "swapon", swap, NULL };
     bool mounted = mount_root(runner, options, root, target_root, errors) &&
                    mount_at(runner, esp, target_root, "/boot", errors) &&

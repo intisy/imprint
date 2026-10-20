@@ -76,7 +76,15 @@ UTEST(install_disks, the_default_target_is_the_internal_nvme_never_the_stick) {
     ASSERT_EQ((size_t)4, disks.count);
     const disk *chosen = disks_default_target(&disks, "/dev/sda");
     ASSERT_TRUE(chosen != NULL);
-    ASSERT_STREQ("/dev/nvme0n1", chosen->path);
+    ASSERT_STREQ("/dev/nvme1n1", chosen->path);
+    const disk *system = NULL;
+    const disk *data = NULL;
+    disks_default_pair(&disks, "/dev/sda", 300ULL * 1024 * 1024 * 1024, &system, &data);
+    ASSERT_STREQ("/dev/nvme0n1", system->path);
+    ASSERT_STREQ("/dev/nvme1n1", data->path);
+    disks_default_pair(&disks, "/dev/sda", 1500ULL * 1000 * 1000 * 1000, &system, &data);
+    ASSERT_STREQ("/dev/nvme1n1", system->path);
+    ASSERT_STREQ("/dev/nvme0n1", data->path);
     ASSERT_STREQ("Vansuny", disks_find(&disks, "/dev/sda")->model);
     disk_list_free(&disks);
 }
@@ -94,7 +102,7 @@ UTEST(install_disks, the_guards_refuse_the_stick_removable_and_unknown_disks) {
     ASSERT_TRUE(error_list_mentions(&errors, "removable"));
     ASSERT_FALSE(disk_check_target(&disks, "/dev/sdz", NULL, &errors));
     ASSERT_TRUE(error_list_mentions(&errors, "not a disk this computer lists"));
-    ASSERT_TRUE(disk_check_target(&disks, "/dev/sdb", "/dev/sda", &errors));
+    ASSERT_TRUE(disk_check_target(&disks, "/dev/nvme1n1", "/dev/sda", &errors));
     ASSERT_TRUE(disk_check_target(&disks, "/dev/nvme0n1", "/dev/sda", &errors));
     error_list_free(&errors);
     disk_list_free(&disks);
@@ -103,7 +111,7 @@ UTEST(install_disks, the_guards_refuse_the_stick_removable_and_unknown_disks) {
 UTEST(install_disks, a_used_disk_holds_something_and_a_changed_serial_is_another_disk) {
     disk_list disks;
     ASSERT_TRUE(load_disks(&disks));
-    const disk *used = disks_find(&disks, "/dev/sdb");
+    const disk *used = disks_find(&disks, "/dev/nvme1n1");
     ASSERT_TRUE(disk_holds_anything(used));
     ASSERT_TRUE(disk_holds_label(used, "data"));
     ASSERT_FALSE(disk_holds_anything(disks_find(&disks, "/dev/nvme0n1")));
@@ -200,6 +208,33 @@ UTEST(install_layout, partitioning_writes_four_partitions_with_a_data_partition)
     ASSERT_TRUE(layout_partition(&runner, &options, &errors));
     ASSERT_TRUE(fake_runner_ran(&runner, "sgdisk -n 1:0:+1024M -t 1:ef00 -c 1:ESP -n 2:0:+16384M -t 2:8200 -c 2:swap "
                                          "-n 3:0:0 -t 3:8300 -c 3:root /dev/nvme0n1"));
+    error_list_free(&errors);
+    fake_runner_free(&runner);
+    install_options_free(&options);
+    resolved_setup_free(&resolved);
+}
+
+UTEST(install_layout, a_data_disk_gets_one_whole_partition_and_root_takes_the_system_disk) {
+    resolved_setup resolved;
+    install_options options;
+    ASSERT_TRUE(load_options(&resolved, &options));
+    install_options_use_data_disk(&options, "/dev/nvme1n1");
+    ASSERT_EQ(0LL, options.root_size_mb);
+    command_runner runner = fake_runner_create(stderr);
+    error_list errors;
+    error_list_init(&errors);
+    ASSERT_TRUE(layout_partition(&runner, &options, &errors));
+    ASSERT_TRUE(layout_format(&runner, &options, &errors));
+    ASSERT_TRUE(layout_mount(&runner, &options, "/mnt", &errors));
+    ASSERT_TRUE(fake_runner_ran(&runner, "sgdisk -n 1:0:+1024M -t 1:ef00 -c 1:ESP -n 2:0:+16384M -t 2:8200 -c 2:swap "
+                                         "-n 3:0:0 -t 3:8300 -c 3:root /dev/nvme0n1"));
+    ASSERT_TRUE(fake_runner_ran(&runner, "sgdisk -Z /dev/nvme1n1"));
+    ASSERT_TRUE(fake_runner_ran(&runner, "sgdisk -n 1:0:0 -t 1:8300 -c 1:data /dev/nvme1n1"));
+    ASSERT_TRUE(fake_runner_ran(&runner, "mkfs.ext4 -F -L data /dev/nvme1n1p1"));
+    ASSERT_TRUE(fake_runner_ran(&runner, "mount /dev/nvme1n1p1 /mnt/data"));
+    install_options_set_data_partition(&options, true);
+    ASSERT_TRUE(options.data_disk == NULL);
+    ASSERT_EQ(262144LL, options.root_size_mb);
     error_list_free(&errors);
     fake_runner_free(&runner);
     install_options_free(&options);

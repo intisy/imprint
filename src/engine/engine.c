@@ -15,7 +15,7 @@ const char ENGINE_USAGE[] =
     "       imprint-engine hooks run <stage> <resolved-setup.json> --data DIR [--personal DIR]\n"
     "       imprint-engine hooks install-firstboot <resolved-setup.json> --data DIR --target DIR [--personal DIR]\n"
     "       imprint-engine install <resolved-setup.json> [--data DIR] [--stick DIR] [--personal DIR] [--disk DEVICE]\n"
-    "                      [--target DIR] [--answers FILE]\n"
+    "                      [--data-disk DEVICE] [--target DIR] [--answers FILE]\n"
     "       imprint-engine --version\n"
     "\n"
     "A stage is one of build, install, firstboot, session. DIR after --data is the data repo the hook scripts\n"

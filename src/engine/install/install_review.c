@@ -28,12 +28,21 @@ static char *disk_line(const install_options *options, const disk_list *disks) {
     return line;
 }
 
-static char *data_line(const install_options *options) {
+static char *data_line(const install_options *options, const disk_list *disks) {
     if (options->offered_data_label == NULL) {
         return text_duplicate("data:          none in this setup");
     }
     if (options->data_label == NULL) {
         return text_duplicate("data:          off, root takes the rest of the disk");
+    }
+    if (options->data_disk != NULL) {
+        const disk *chosen = disks_find(disks, options->data_disk);
+        char *description = chosen == NULL ? text_duplicate(options->data_disk) : disk_describe(chosen);
+        char *line = text_format("data:          all of %s%s, %s labelled %s at %s", description,
+                                 chosen != NULL && disk_holds_anything(chosen) ? " (NOT empty)" : "",
+                                 options->data_filesystem, options->data_label, options->data_mount);
+        free(description);
+        return line;
     }
     return text_format("data:          on, rest of the disk, %s labelled %s at %s (root %lld MiB)",
                        options->data_filesystem, options->data_label, options->data_mount, options->root_size_mb);
@@ -54,7 +63,7 @@ static void build_items(const install_options *options, const disk_list *disks, 
     items[FIELD_ROOT_FILESYSTEM] = text_format("root fs:       %s%s", root_filesystem_name(options->root_fs),
                                                options->root_fs == ROOT_BTRFS ? ", with snapshots" : "");
     items[FIELD_SWAP] = text_format("swap:          %lld MiB", options->swap_size_mb);
-    items[FIELD_DATA_PARTITION] = data_line(options);
+    items[FIELD_DATA_PARTITION] = data_line(options, disks);
 }
 
 static void free_items(char **items) {
@@ -114,6 +123,54 @@ static void edit_disk(ui *screen, install_options *options, const disk_list *dis
     free(descriptions);
 }
 
+static void edit_data(ui *screen, install_options *options, const disk_list *disks, const char *stick_disk) {
+    if (options->offered_data_label == NULL) {
+        ui_log(screen, UI_INFORMATION, "this setup has no data partition");
+        return;
+    }
+    size_t count = disks->count + 2;
+    char **choices = memory_allocate(count * sizeof *choices);
+    choices[0] = text_duplicate("off");
+    choices[1] = text_duplicate("on the system disk, after root");
+    for (size_t index = 0; index < disks->count; index++) {
+        char *description = disk_describe(&disks->items[index]);
+        choices[index + 2] = text_format("all of %s", description);
+        free(description);
+    }
+    size_t chosen = 0;
+    if (ui_choose_one(screen, "where the data partition goes", (const char *const *)choices, count, 1, &chosen)) {
+        if (chosen < 2) {
+            install_options_set_data_partition(options, chosen == 1);
+        } else {
+            install_options_use_data_disk(options, disks->items[chosen - 2].path);
+            error_list errors;
+            error_list_init(&errors);
+            if (!install_check_data_disk(options, disks, stick_disk, &errors)) {
+                ui_log(screen, UI_ERROR, errors.items[0].message);
+                install_options_set_data_partition(options, true);
+            }
+            error_list_free(&errors);
+        }
+    }
+    for (size_t index = 0; index < count; index++) {
+        free(choices[index]);
+    }
+    free(choices);
+}
+
+bool install_check_data_disk(const install_options *options, const disk_list *disks, const char *stick_disk,
+                             error_list *errors) {
+    if (options->data_disk == NULL) {
+        return true;
+    }
+    if (options->disk != NULL && strcmp(options->disk, options->data_disk) == 0) {
+        error_push(errors, NULL, 0, "%s is the system disk; choose another disk for the data, or keep it on the system "
+                   "disk", options->data_disk);
+        return false;
+    }
+    return disk_check_target(disks, options->data_disk, stick_disk, errors);
+}
+
 static void edit_number(ui *screen, const char *prompt, long long *field) {
     char *current = text_format("%lld", *field);
     char *answer = NULL;
@@ -146,7 +203,8 @@ static bool ready_to_start(ui *screen, const install_options *options, const dis
     }
     error_list errors;
     error_list_init(&errors);
-    bool usable = options->disk != NULL && disk_check_target(disks, options->disk, stick_disk, &errors);
+    bool usable = options->disk != NULL && disk_check_target(disks, options->disk, stick_disk, &errors) &&
+                  install_check_data_disk(options, disks, stick_disk, &errors);
     if (!usable) {
         ui_log(screen, UI_ERROR, errors.count > 0 ? errors.items[0].message : "choose the disk to install onto first");
     }
@@ -165,7 +223,7 @@ static void edit_field(ui *screen, size_t field, install_options *options, const
     case FIELD_LOCALE: edit_text(screen, "locale", &options->locale); break;
     case FIELD_ROOT_FILESYSTEM: edit_root_filesystem(screen, options); break;
     case FIELD_SWAP: edit_number(screen, "swap in MiB", &options->swap_size_mb); break;
-    case FIELD_DATA_PARTITION: install_options_set_data_partition(options, options->data_label == NULL); break;
+    case FIELD_DATA_PARTITION: edit_data(screen, options, disks, stick_disk); break;
     default: break;
     }
 }

@@ -30,6 +30,7 @@ typedef struct install_options {
     long long root_size_mb;
     root_filesystem root_fs;
     char *data_label;
+    char *data_disk;
     char *data_mount;
     char *data_filesystem;
     char *offered_data_label;
@@ -56,6 +57,9 @@ bool install_options_have_display_manager(const install_options *options);
 
 /** Sets the data partition on or off; off gives root the rest of the disk, on restores the setup's layout. */
 void install_options_set_data_partition(install_options *options, bool enabled);
+
+/** Puts the data partition on a whole second disk; root then takes the rest of the system disk. */
+void install_options_use_data_disk(install_options *options, const char *data_disk);
 void install_options_replace(char **field, const char *value);
 const char *root_filesystem_name(root_filesystem filesystem);
 

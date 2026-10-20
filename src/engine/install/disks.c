@@ -285,3 +285,31 @@ char *disks_holding_directory(command_runner *runner, const char *directory, err
     free(source);
     return found;
 }
+
+static bool is_candidate(const disk *candidate, const char *stick_disk) {
+    bool is_stick = stick_disk != NULL && strcmp(candidate->path, stick_disk) == 0;
+    return !is_stick && !candidate->mounted && is_internal_and_writable(candidate);
+}
+
+void disks_default_pair(const disk_list *disks, const char *stick_disk, unsigned long long system_minimum,
+                        const disk **system, const disk **data) {
+    *system = NULL;
+    *data = NULL;
+    for (size_t index = 0; index < disks->count; index++) {
+        const disk *candidate = &disks->items[index];
+        bool fits = candidate->size >= system_minimum;
+        if (is_candidate(candidate, stick_disk) && fits && (*system == NULL || candidate->size < (*system)->size)) {
+            *system = candidate;
+        }
+    }
+    for (size_t index = 0; *system != NULL && index < disks->count; index++) {
+        const disk *candidate = &disks->items[index];
+        if (candidate != *system && is_candidate(candidate, stick_disk) &&
+            (*data == NULL || candidate->size > (*data)->size)) {
+            *data = candidate;
+        }
+    }
+    if (*data == NULL) {
+        *system = disks_default_target(disks, stick_disk);
+    }
+}

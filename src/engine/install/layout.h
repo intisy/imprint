@@ -15,6 +15,9 @@ enum layout_partition_number {
 char *partition_path(const char *disk, int number);
 char *layout_describe(const install_options *options);
 
+/** Partition 4 of the system disk, or partition 1 of the data disk when the data partition has a disk of its own. */
+char *layout_data_partition(const install_options *options);
+
 bool layout_partition(command_runner *runner, const install_options *options, error_list *errors);
 bool layout_format(command_runner *runner, const install_options *options, error_list *errors);
 

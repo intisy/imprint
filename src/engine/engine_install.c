@@ -93,7 +93,8 @@ int engine_install_run(int argument_count, const char *const *arguments, FILE *o
         return usage(error_output, "a resolved setup file must follow", "install");
     }
     named_option options[] = { { "--data", NULL }, { "--stick", NULL }, { "--personal", NULL },
-                               { "--disk", NULL }, { "--answers", NULL }, { "--target", NULL } };
+                               { "--disk", NULL }, { "--answers", NULL }, { "--target", NULL },
+                               { "--data-disk", NULL } };
     const char *problem_word = NULL;
     if (!options_read(arguments + 3, (size_t)(argument_count - 3), options, COUNT_OF(options), &problem_word)) {
         return usage(error_output, "unknown option or one without a value", problem_word);
@@ -112,7 +113,7 @@ int engine_install_run(int argument_count, const char *const *arguments, FILE *o
         install_request request = { .setup_file = paths.setup_file, .data_directory = paths.data_directory,
                                     .stick_root = paths.stick_root, .personal_directory = paths.personal_directory,
                                     .target_root = options[5].value != NULL ? options[5].value : DEFAULT_TARGET_ROOT,
-                                    .disk = options[3].value, .live_gpg_directory = LIVE_GPG_DIRECTORY,
+                                    .disk = options[3].value, .data_disk = options[6].value, .live_gpg_directory = LIVE_GPG_DIRECTORY,
                                     .screen = screen, .runner = &runner };
         exit_code = install_run(&request, &errors);
         ui_destroy(screen);

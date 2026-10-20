@@ -13,6 +13,7 @@ typedef struct install_request {
     const char *personal_directory;
     const char *target_root;
     const char *disk;
+    const char *data_disk;
     const char *live_gpg_directory;
     ui *screen;
     command_runner *runner;
@@ -26,6 +27,10 @@ bool install_review(ui *screen, install_options *options, const disk_list *disks
 
 /** Asks for the disk's name when it holds anything; false when the typed name does not match. */
 bool install_confirm_erase(ui *screen, const disk *target, const char *data_label);
+
+/** The data disk passes the guards and is not the system disk. */
+bool install_check_data_disk(const install_options *options, const disk_list *disks, const char *stick_disk,
+                             error_list *errors);
 
 /** Installs the resolved setup in request->setup_file onto a disk; returns an imprint exit code. */
 int install_run(const install_request *request, error_list *errors);

@@ -19,6 +19,7 @@ void install_options_free(install_options *options) {
     char **texts[] = { &options->disk, &options->hostname, &options->username, &options->password,
                        &options->password_hash, &options->timezone, &options->locale, &options->keyboard_layout,
                        &options->display_manager, &options->bootloader, &options->aur_helper, &options->data_label,
+                       &options->data_disk,
                        &options->data_mount, &options->data_filesystem, &options->offered_data_label };
     for (size_t index = 0; index < COUNT_OF(texts); index++) {
         free(*texts[index]);
@@ -186,7 +187,16 @@ bool install_options_should_expire_password(const install_options *options) {
     return options->expire_password && !install_options_have_display_manager(options);
 }
 
+void install_options_use_data_disk(install_options *options, const char *data_disk) {
+    install_options_set_data_partition(options, options->offered_data_label != NULL);
+    if (options->data_label != NULL) {
+        install_options_replace(&options->data_disk, data_disk);
+        options->root_size_mb = 0;
+    }
+}
+
 void install_options_set_data_partition(install_options *options, bool enabled) {
+    install_options_replace(&options->data_disk, NULL);
     if (enabled && options->offered_data_label != NULL) {
         install_options_replace(&options->data_label, options->offered_data_label);
         options->root_size_mb = options->offered_root_size_mb;
