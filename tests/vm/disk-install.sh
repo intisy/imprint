@@ -152,6 +152,16 @@ read_result() {
     umount "$work/results"
 }
 
+# Only START is answered, so the review's defaults apply: the data partition at threshold 50.
+check_storage_choice() {
+    python3 - "$work/install.firstboot-setup.json" <<'PYTHON' || fail "choices.storage in the firstboot bundle is not the review's default"
+import json, sys
+storage = json.load(open(sys.argv[1]))["choices"]["storage"]
+print("[disk-install] choices.storage in the firstboot bundle:", json.dumps(storage, sort_keys=True))
+sys.exit(0 if (storage["node"], storage.get("path"), storage["threshold"]) == ("data-disk", "/data", 50) else 1)
+PYTHON
+}
+
 mkdir -p "$work"
 extract_live_kernel
 name=$(setup_name)
@@ -166,6 +176,7 @@ else
     run_live guest-install.sh "$install_timeout" "$work/install-serial.log"
     read_result install
     [ "$(cat "$work/install.exit" 2>/dev/null)" = 0 ] || fail "imprint-engine install failed, see $work/install.log"
+    check_storage_choice
     say "install passed; logging in through the display manager"
 fi
 login_through_display_manager

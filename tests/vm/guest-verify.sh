@@ -81,6 +81,10 @@ check "GRUB on the removable path" test -f "$root/boot/EFI/BOOT/BOOTX64.EFI"
 check "GRUB with its own entry" test -f "$root/boot/EFI/imprint/grubx64.efi"
 check "grub.cfg written" test -s "$root/boot/grub/grub.cfg"
 check "the firstboot unit ran" test -f "$root/var/log/imprint/firstboot.log"
+check "the storage-join hook read the data partition from choices.storage" grep -E -q \
+    'storage-join hook: (the install chose not to join the storage network \(node data-disk\)|joining with the drive node at /data, threshold 50)' \
+    "$root/var/log/imprint/firstboot.log"
+check "the firstboot hooks succeeded and removed their unit" absent test -e "$root/etc/systemd/system/imprint-firstboot.service"
 check "$user logged in through the display manager (PAM session opened)" journal_has "pam_unix\((lightdm|sddm|gdm-password):session\): session opened for user $user"
 check "no expired-password refusal at the greeter" absent journal_has "(password expired|authentication token is no longer valid|You are required to change your password)"
 journalctl -D "$root/var/log/journal" --no-pager -o short | grep -E 'lightdm|pam_unix|firstboot' | tail -40
