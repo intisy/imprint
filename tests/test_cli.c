@@ -4,6 +4,7 @@
 #include "text.h"
 #include "utest.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 #define ROOT IMPRINT_TEST_FIXTURES
@@ -226,5 +227,30 @@ UTEST(cli, the_menu_on_a_fresh_clone_reports_the_submodules_instead_of_no_setups
     ASSERT_TRUE(contains(result.error_output, SUBMODULE_HINT));
     ASSERT_FALSE(contains(ui_scripted_transcript(scripted), "no setups"));
     ui_destroy(scripted);
+    cli_result_free(&result);
+}
+
+UTEST(cli, bundle_writes_the_setup_the_data_repo_and_the_engine) {
+    const char *directory = IMPRINT_TEST_WORK "/bundle";
+    const char *const arguments[] = { "imprint", "--root", ROOT, "bundle", "workstation", directory, "--engine",
+                                      IMPRINT_TEST_FIXTURES "/install/data/dotfiles/i3/config" };
+    cli_result result = run(arguments, COUNT_OF(arguments));
+    ASSERT_EQ(IMPRINT_EXIT_OK, result.exit_code);
+    ASSERT_TRUE(contains(result.output, "<stick>/imprint/"));
+    error_list errors;
+    error_list_init(&errors);
+    char *json = NULL;
+    ASSERT_TRUE(file_read_all(IMPRINT_TEST_WORK "/bundle/workstation.json", &json, &errors));
+    document_node *parsed = document_parse_json(json, "workstation.json", &errors);
+    ASSERT_EQ(2LL, document_get(parsed, "format")->integer_value);
+    char *engine = NULL;
+    ASSERT_TRUE(file_read_all(IMPRINT_TEST_WORK "/bundle/imprint-engine", &engine, &errors));
+    char *setup = NULL;
+    ASSERT_TRUE(file_read_all(IMPRINT_TEST_WORK "/bundle/data/setups/workstation.toml", &setup, &errors));
+    free(setup);
+    free(engine);
+    document_free(parsed);
+    free(json);
+    error_list_free(&errors);
     cli_result_free(&result);
 }

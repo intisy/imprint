@@ -141,3 +141,40 @@ int command_hooks_install_firstboot(const char *root, const char *name, const ch
     prepared_free(&prepared);
     return command_finish(context, &errors, exit_code);
 }
+
+static bool write_bundle(const prepared_setup *prepared, const char *directory, const char *engine,
+                         error_list *errors) {
+    char *setup_name = text_format("%s.json", prepared->resolved.name);
+    char *setup_file = path_join(directory, setup_name);
+    char *data_copy = path_join(directory, "data");
+    char *engine_copy = path_join(directory, "imprint-engine");
+    bool written = directory_make_all(directory, errors) && file_write_text(setup_file, prepared->json, errors) &&
+                   directory_make_all(data_copy, errors) && file_tree_copy(prepared->data_directory, data_copy, errors) &&
+                   (engine == NULL || (file_copy(engine, engine_copy, errors) &&
+                                       platform_set_mode(engine_copy, 0755, errors)));
+    free(setup_name);
+    free(setup_file);
+    free(data_copy);
+    free(engine_copy);
+    return written;
+}
+
+int command_bundle(const char *root, const char *name, const char *directory, const char *engine,
+                   cli_context *context) {
+    if (!setup_name_is_valid(name)) {
+        return refuse_name(name, context);
+    }
+    error_list errors;
+    error_list_init(&errors);
+    prepared_setup prepared;
+    int exit_code = prepare(root, name, NULL, &prepared, &errors);
+    if (exit_code == IMPRINT_EXIT_OK) {
+        exit_code = write_bundle(&prepared, directory, engine, &errors) ? IMPRINT_EXIT_OK : IMPRINT_EXIT_ENVIRONMENT;
+    }
+    if (exit_code == IMPRINT_EXIT_OK) {
+        fprintf(context->output, "wrote %s/%s.json, %s/data%s: copy %s to <stick>/imprint/\n", directory, name, directory,
+                engine == NULL ? "" : " and imprint-engine", directory);
+    }
+    prepared_free(&prepared);
+    return command_finish(context, &errors, exit_code);
+}

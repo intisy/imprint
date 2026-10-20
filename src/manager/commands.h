@@ -15,6 +15,8 @@ int command_hooks_run(const char *root, const char *stage_name, const char *name
                       cli_context *context);
 int command_hooks_install_firstboot(const char *root, const char *name, const char *target, const char *personal,
                                     cli_context *context);
+/** Writes what a stick carries in imprint/ for the setup: <name>.json, data/ and, given one, the engine binary. */
+int command_bundle(const char *root, const char *name, const char *directory, const char *engine, cli_context *context);
 int command_finish(cli_context *context, error_list *errors, int exit_code);
 
 #endif
