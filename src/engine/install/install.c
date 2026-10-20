@@ -204,10 +204,21 @@ static void install_firstboot_hooks(install_session *session, error_list *errors
     hook_list_free(&hooks);
 }
 
-static int finish(install_session *session, error_list *errors) {
+/** @implNote A process the chroot left behind (a gpg-agent, a flatpak helper) can keep the target busy for a while. */
+static void unmount_target(install_session *session, error_list *errors) {
     command_runner *runner = session->request->runner;
     const char *const unmount[] = { "umount", "-R", session->request->target_root, NULL };
-    runner_run(runner, unmount, errors);
+    const char *const detach_lazily[] = { "umount", "-R", "-l", session->request->target_root, NULL };
+    const char *const flush[] = { "sync", NULL };
+    if (runner_run(runner, unmount, errors) != 0) {
+        runner_run(runner, flush, errors);
+        runner_run(runner, detach_lazily, errors);
+    }
+}
+
+static int finish(install_session *session, error_list *errors) {
+    command_runner *runner = session->request->runner;
+    unmount_target(session, errors);
     for (size_t index = 0; index < session->problems.count; index++) {
         runner_say(runner, "PROBLEM: %s", session->problems.items[index]);
     }

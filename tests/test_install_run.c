@@ -81,6 +81,25 @@ UTEST(install_run, two_disks_install_in_order_with_both_grub_paths) {
     fixture_close(&fixture);
 }
 
+UTEST(install_run, a_busy_target_is_detached_lazily_after_a_sync) {
+    run_fixture fixture;
+    fixture_open(&fixture, "run-busy");
+    char *unmount = text_format("umount -R %s", fixture.target);
+    fake_runner_answer(&fixture.runner, unmount, 32, "umount: target is busy.");
+    const char *const answers[] = { "5", "pw", "pw", "1", "nvme1n1" };
+    ui *screen = NULL;
+    error_list errors;
+    error_list_init(&errors);
+    ASSERT_EQ(IMPRINT_EXIT_OK, run_with(&fixture, answers, COUNT_OF(answers), &screen, &errors));
+    char *lazily = text_format("umount -R -l %s", fixture.target);
+    ASSERT_TRUE(fake_runner_index(&fixture.runner, lazily) > fake_runner_index(&fixture.runner, "sync"));
+    free(lazily);
+    free(unmount);
+    ui_destroy(screen);
+    error_list_free(&errors);
+    fixture_close(&fixture);
+}
+
 UTEST(install_run, start_without_a_password_shows_the_screen_again) {
     run_fixture fixture;
     fixture_open(&fixture, "run-no-password");
