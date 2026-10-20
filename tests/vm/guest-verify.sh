@@ -39,6 +39,14 @@ disk_with_serial() {
     lsblk -dnpo NAME,SERIAL | awk -v serial="$1" '$2 == serial {print $1}'
 }
 
+fstab_mounts() {
+    awk -v point="$1" '$1 !~ /^#/ && $2 == point {found = 1} END {exit !found}' "$root/etc/fstab"
+}
+
+owned_by_user() {
+    test "$(stat -c %u "$1")" = "$(awk -F: -v name="$user" '$1 == name {print $3}' "$root/etc/passwd")"
+}
+
 partition_labels() {
     lsblk -nro PARTLABEL "$1" | sed '/^$/d' | tr '\n' ' '
 }
@@ -52,8 +60,8 @@ mount "${data_disk}p1" "$root/data"
 
 check "system disk: ESP, swap, root" test "$(partition_labels "$system_disk")" = "ESP swap root "
 check "data disk: one partition labelled data" test "$(partition_labels "$data_disk")" = "data "
-check "fstab mounts /, /boot, /data and swap" bash -c "grep -q ' / ' $root/etc/fstab && grep -q ' /boot ' $root/etc/fstab && grep -q ' /data ' $root/etc/fstab && grep -q swap $root/etc/fstab"
-check "/data belongs to $user" test "$(stat -c %U "$root/data")" = "$user"
+for point in / /boot /data none; do check "fstab mounts $point" fstab_mounts "$point"; done
+check "/data belongs to $user" owned_by_user "$root/data"
 while read -r package; do check "package $package" package_installed "$package"; done < "$expected/packages"
 while read -r package; do check "AUR package $package" package_installed "$package"; done < "$expected/aur"
 for package in tailscale syncthing curl jq; do check "storage join needs $package" package_installed "$package"; done
@@ -61,7 +69,7 @@ while read -r app; do check "Flatpak $app" test -d "$root/var/lib/flatpak/app/$a
 while read -r service; do check "service $service enabled" unit_enabled "$service"; done < "$expected/services"
 check "a display manager is enabled" test -L "$root/etc/systemd/system/display-manager.service"
 check "the i3 config is in the home" test -f "$root/home/$user/.config/i3/config"
-check "the home belongs to $user" test "$(stat -c %U "$root/home/$user")" = "$user"
+check "the home belongs to $user" owned_by_user "$root/home/$user"
 check "the password is not expired (VD-10)" test "$(awk -F: -v name="$user" '$1 == name {print $3}' "$root/etc/shadow")" != 0
 check "no stick repository left in pacman.conf" absent grep -q '^\[offline' "$root/etc/pacman.conf"
 check "the mirrorlist is restored" absent grep -q imprint-no-mirror "$root/etc/pacman.d/mirrorlist"
