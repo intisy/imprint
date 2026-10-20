@@ -210,3 +210,13 @@ int platform_run_streaming(const char *const *arguments, FILE *output, error_lis
 bool platform_terminal_is_interactive(FILE *stream) {
     return _isatty(_fileno(stream)) != 0;
 }
+
+bool platform_set_echo(FILE *input, bool enabled) {
+    HANDLE handle = (HANDLE)_get_osfhandle(_fileno(input));
+    DWORD mode = 0;
+    if (handle == INVALID_HANDLE_VALUE || !GetConsoleMode(handle, &mode)) {
+        return false;
+    }
+    mode = enabled ? (mode | ENABLE_ECHO_INPUT) : (mode & ~(DWORD)ENABLE_ECHO_INPUT);
+    return SetConsoleMode(handle, mode) != 0;
+}

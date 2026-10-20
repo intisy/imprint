@@ -206,6 +206,32 @@ static bool ansi_text(ui *self, const char *prompt, const char *default_value, c
     }
 }
 
+static bool ansi_secret(ui *self, const char *prompt, char **answer) {
+    ansi_state *state = state_of(self);
+    char line[ANSWER_LENGTH];
+    for (;;) {
+        fprintf(state->output, "%s (not shown): ", prompt);
+        bool hidden = platform_set_echo(state->input, false);
+        answer_status status = read_answer(state, line);
+        if (hidden) {
+            platform_set_echo(state->input, true);
+            line_break(state);
+        }
+        if (status == ANSWER_INPUT_ENDED) {
+            if (!hidden) {
+                line_break(state);
+            }
+            return false;
+        }
+        if (status == ANSWER_READ) {
+            *answer = text_duplicate(line);
+            memset(line, 0, sizeof line);
+            return true;
+        }
+        hint(state, "That is longer than 255 characters.");
+    }
+}
+
 static void lowercase(char *text) {
     for (; *text != '\0'; text++) {
         *text = (char)tolower((unsigned char)*text);
@@ -273,6 +299,7 @@ static const ui_operations ANSI_OPERATIONS = {
     .choose_one = ansi_choose_one,
     .choose_many = ansi_choose_many,
     .text = ansi_text,
+    .secret = ansi_secret,
     .confirm = ansi_confirm,
     .progress = ansi_progress,
     .log = ansi_log,

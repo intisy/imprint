@@ -1,5 +1,5 @@
 {
-  "format": 1,
+  "format": 2,
   "name": "hooked",
   "distro": "arch",
   "package_manager": "pacman",
@@ -12,7 +12,7 @@
   "repo_setup": [],
   "services": [],
   "user_services": [],
-  "skipped": [],
+  "skipped": [], "dotfiles": [],
   "setup": {
     "distro": "arch",
     "apps": ["git"],

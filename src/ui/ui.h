@@ -15,6 +15,7 @@ typedef struct ui_operations {
                        size_t *chosen);
     bool (*choose_many)(ui *self, const char *prompt, const char *const *items, size_t count, bool *selected);
     bool (*text)(ui *self, const char *prompt, const char *default_value, char **answer);
+    bool (*secret)(ui *self, const char *prompt, char **answer);
     bool (*confirm)(ui *self, const char *question, bool default_answer, bool *answer);
     void (*progress)(ui *self, const char *label, size_t done, size_t total);
     void (*log)(ui *self, ui_level level, const char *message);
@@ -42,6 +43,11 @@ static inline bool ui_choose_many(ui *self, const char *prompt, const char *cons
 
 static inline bool ui_text(ui *self, const char *prompt, const char *default_value, char **answer) {
     return self->operations->text(self, prompt, default_value, answer);
+}
+
+/** A text answer that is not shown while it is typed and never recorded. */
+static inline bool ui_secret(ui *self, const char *prompt, char **answer) {
+    return self->operations->secret(self, prompt, answer);
 }
 
 static inline bool ui_confirm(ui *self, const char *question, bool default_answer, bool *answer) {

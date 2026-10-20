@@ -4,6 +4,18 @@
 #include "catalog.h"
 #include "setup.h"
 
+/** A window manager's config file: source relative to the data repo, target relative to the user's home. */
+typedef struct dotfile {
+    char *source;
+    char *target;
+} dotfile;
+
+typedef struct dotfile_list {
+    dotfile *items;
+    size_t count;
+    size_t capacity;
+} dotfile_list;
+
 typedef struct resolved_setup {
     char *name;
     char *distro;
@@ -18,7 +30,10 @@ typedef struct resolved_setup {
     string_list services;
     string_list user_services;
     string_list skipped;
+    dotfile_list dotfiles;
     document_node *setup;
+    /** What the person chose at install, such as `storage`; NULL until an install review fills it. */
+    document_node *choices;
 } resolved_setup;
 
 void resolved_setup_init(resolved_setup *resolved);

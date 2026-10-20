@@ -1,0 +1,22 @@
+{
+   "blockdevices": [
+      {"name":"loop0", "path":"/dev/loop0", "size":838860800, "type":"loop", "rm":false, "ro":true, "tran":null, "serial":null, "model":null, "fstype":"squashfs", "label":null, "partlabel":null, "mountpoints":["/run/archiso/airootfs"]},
+      {"name":"sda", "path":"/dev/sda", "size":62008590336, "type":"disk", "rm":true, "ro":false, "tran":"usb", "serial":"0123456789AB", "model":"Vansuny         ", "fstype":null, "label":null, "partlabel":null, "mountpoints":[null],
+         "children": [
+            {"name":"sda1", "path":"/dev/sda1", "size":61974970368, "type":"part", "rm":true, "ro":false, "tran":null, "serial":null, "model":null, "fstype":"exfat", "label":"Ventoy", "partlabel":null, "mountpoints":[null],
+               "children": [
+                  {"name":"stick", "path":"/dev/mapper/stick", "size":61974970368, "type":"dm", "rm":false, "ro":true, "tran":null, "serial":null, "model":null, "fstype":"exfat", "label":"Ventoy", "partlabel":null, "mountpoints":["/run/stick"]}
+               ]
+            },
+            {"name":"sda2", "path":"/dev/sda2", "size":33554432, "type":"part", "rm":true, "ro":false, "tran":null, "serial":null, "model":null, "fstype":"vfat", "label":"VTOYEFI", "partlabel":null, "mountpoints":[null]}
+         ]
+      },
+      {"name":"nvme1n1", "path":"/dev/nvme1n1", "size":2048408248320, "type":"disk", "rm":false, "ro":false, "tran":"nvme", "serial":"VB2TB0001", "model":"Vi5000", "fstype":null, "label":null, "partlabel":null, "mountpoints":[null],
+         "children": [
+            {"name":"nvme1n1p1", "path":"/dev/nvme1n1p1", "size":2048407199744, "type":"part", "rm":false, "ro":false, "tran":null, "serial":null, "model":null, "fstype":"ext4", "label":"data", "partlabel":"data", "mountpoints":[null]}
+         ]
+      },
+      {"name":"mmcblk0", "path":"/dev/mmcblk0", "size":31914983424, "type":"disk", "rm":true, "ro":false, "tran":null, "serial":"0xabc", "model":null, "fstype":null, "label":null, "partlabel":null, "mountpoints":[null]},
+      {"name":"nvme0n1", "path":"/dev/nvme0n1", "size":1024209543168, "type":"disk", "rm":false, "ro":false, "tran":"nvme", "serial":"WD1TB0001", "model":"WDC PC SN730 SDBPNTY-1T00", "fstype":null, "label":null, "partlabel":null, "mountpoints":[null]}
+   ]
+}

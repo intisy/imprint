@@ -21,6 +21,8 @@ static const char USAGE[] =
     "                                run the setup's hooks of one stage (build, install, firstboot, session)\n"
     "  hooks install-firstboot <name> --target ROOT [--personal PERSONAL]\n"
     "                                make an installed system at ROOT run the firstboot hooks on its next boot\n"
+    "  bundle <name> <directory> [--engine FILE]\n"
+    "                                write what a stick carries in imprint/ to install the setup with imprint-engine\n"
     "\n"
     "DIR defaults to IMPRINT_ROOT, else the current directory. Without a command, imprint opens a menu.\n"
     "PERSONAL is the stick's personal/ folder, handed to hooks as IMPRINT_PERSONAL.\n";
@@ -137,6 +139,18 @@ static int run_hooks(const invocation *parsed, cli_context *context) {
     return command_hooks_install_firstboot(parsed->root, parsed->words[2], options[1].value, options[0].value, context);
 }
 
+static int run_bundle(const invocation *parsed, cli_context *context) {
+    if (parsed->word_count < 3) {
+        return usage_error(context, "a setup name and a directory must follow", "bundle");
+    }
+    named_option options[] = { { "--engine", NULL } };
+    const char *problem_word = NULL;
+    if (!options_read(parsed->words + 3, parsed->word_count - 3, options, 1, &problem_word)) {
+        return usage_error(context, "unknown option or one without a value", problem_word);
+    }
+    return command_bundle(parsed->root, parsed->words[1], parsed->words[2], options[0].value, context);
+}
+
 static int run_alone(const invocation *parsed, cli_context *context, int (*command)(const char *, cli_context *)) {
     if (parsed->word_count > 1) {
         return usage_error(context, "too many arguments for", parsed->words[0]);
@@ -171,6 +185,9 @@ int cli_run(int argument_count, const char *const *arguments, cli_context *conte
     }
     if (strcmp(command, "hooks") == 0) {
         return run_hooks(&parsed, context);
+    }
+    if (strcmp(command, "bundle") == 0) {
+        return run_bundle(&parsed, context);
     }
     if (strcmp(command, "help") == 0) {
         fputs(USAGE, context->output);

@@ -41,4 +41,7 @@ int platform_run_capture(const char *const *arguments, char **output, error_list
 int platform_run_streaming(const char *const *arguments, FILE *output, error_list *errors);
 bool platform_terminal_is_interactive(FILE *stream);
 
+/** Turns the terminal's echo of typed characters on or off; false when the stream is no terminal. */
+bool platform_set_echo(FILE *input, bool enabled);
+
 #endif

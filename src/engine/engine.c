@@ -2,6 +2,7 @@
 
 #include "document.h"
 #include "engine_hooks.h"
+#include "engine_install.h"
 #include "exit_codes.h"
 #include "plan.h"
 #include "resolve.h"
@@ -13,10 +14,15 @@ const char ENGINE_USAGE[] =
     "usage: imprint-engine plan <resolved-setup.json>\n"
     "       imprint-engine hooks run <stage> <resolved-setup.json> --data DIR [--personal DIR]\n"
     "       imprint-engine hooks install-firstboot <resolved-setup.json> --data DIR --target DIR [--personal DIR]\n"
+    "       imprint-engine install <resolved-setup.json> [--data DIR] [--stick DIR] [--personal DIR] [--disk DEVICE]\n"
+    "                      [--data-disk DEVICE] [--target DIR] [--answers FILE]\n"
     "       imprint-engine --version\n"
     "\n"
     "A stage is one of build, install, firstboot, session. DIR after --data is the data repo the hook scripts\n"
-    "live in; after --target, the root of the installed system.\n";
+    "live in; after --target, the root of the installed system.\n"
+    "install erases a disk and installs the setup onto it from a booted live stick. By default the setup file sits\n"
+    "in <stick>/imprint/, the data repo beside it in data/, and the stick's offline repositories and personal/ are\n"
+    "found in <stick>/imprint/ or <stick>/ventoy-deploy/. --answers FILE answers the review screen, one per line.\n";
 
 static int plan_file(const char *path, FILE *output, FILE *error_output) {
     error_list errors;
@@ -43,6 +49,9 @@ int engine_run(int argument_count, const char *const *arguments, FILE *output, F
     if (argument_count == 2 && strcmp(arguments[1], "--version") == 0) {
         fprintf(output, "imprint-engine %s\n", IMPRINT_VERSION);
         return IMPRINT_EXIT_OK;
+    }
+    if (argument_count >= 2 && strcmp(arguments[1], "install") == 0) {
+        return engine_install_run(argument_count, arguments, output, error_output);
     }
     if (argument_count >= 2 && strcmp(arguments[1], "hooks") == 0) {
         return engine_hooks_run(argument_count, arguments, output, error_output);
