@@ -14,7 +14,8 @@ keep_firstboot_setup() {
     local system_disk
     system_disk=$(lsblk -dnpo NAME,SERIAL | awk '$2 == "IMPRINTSYSTEM" {print $1}')
     mkdir -p /run/installed
-    mount -o ro "${system_disk}p3" /run/installed || return 0
+    # Not `-o ro`: after a lazy unmount the root can still be mounted read-write, and mount refuses to change that.
+    mount "${system_disk}p3" /run/installed || return 0
     cp /run/installed/var/lib/imprint/firstboot/setup.json /run/t/install.firstboot-setup.json
     umount /run/installed
 }
