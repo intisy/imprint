@@ -1,5 +1,5 @@
 {
-  "format": 1,
+  "format": 2,
   "name": "boot-test",
   "distro": "debian",
   "package_manager": "apt",
@@ -12,7 +12,7 @@
   "repo_setup": [],
   "services": [],
   "user_services": [],
-  "skipped": [],
+  "skipped": [], "dotfiles": [],
   "setup": {
     "hooks": [{ "stage": "firstboot", "script": "hooks/count.sh" }, { "stage": "firstboot", "script": "hooks/flaky.sh" }]
   }

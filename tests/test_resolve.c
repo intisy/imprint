@@ -1,4 +1,5 @@
 #include "resolve.h"
+#include "text.h"
 #include "utest.h"
 
 #include <stdio.h>
@@ -123,7 +124,7 @@ UTEST(resolve, json_from_another_format_is_refused) {
     error_list_init(&errors);
     ASSERT_FALSE(resolved_setup_from_json("{\"format\": 99, \"setup\": {}}", "old.json", &resolved, &errors));
     resolved_setup_free(&resolved);
-    ASSERT_TRUE(error_list_mentions(&errors, "format 99 is not 1"));
+    ASSERT_TRUE(error_list_mentions(&errors, "format 99 is not 2"));
     error_list_free(&errors);
 }
 
@@ -139,10 +140,10 @@ static bool is_refused_with(const char *json, const char *message) {
 }
 
 static const char COMPLETE_DOCUMENT[] =
-    "{\"format\": 1, \"name\": \"n\", \"distro\": \"arch\", \"package_manager\": \"pacman\", "
+    "{\"format\": 2, \"name\": \"n\", \"distro\": \"arch\", \"package_manager\": \"pacman\", "
     "\"bootloader\": \"grub\", \"window_managers\": [], \"apps\": [], \"packages\": [], \"aur\": [], "
     "\"flatpak\": [], \"repo_setup\": [], \"services\": [], \"user_services\": [], \"skipped\": [], "
-    "\"setup\": {}%s}";
+    "\"dotfiles\": [], \"setup\": {}%s}";
 
 UTEST(resolve, a_complete_document_is_accepted) {
     char document[1024];
@@ -156,7 +157,7 @@ UTEST(resolve, a_complete_document_is_accepted) {
 }
 
 UTEST(resolve, a_missing_list_key_is_refused) {
-    ASSERT_TRUE(is_refused_with("{\"format\": 1, \"name\": \"n\", \"distro\": \"arch\", \"package_manager\": \"pacman\", "
+    ASSERT_TRUE(is_refused_with("{\"format\": 2, \"name\": \"n\", \"distro\": \"arch\", \"package_manager\": \"pacman\", "
                    "\"bootloader\": \"grub\", \"setup\": {}}",
                    "missing required key 'window_managers'"));
 }
@@ -167,6 +168,62 @@ UTEST(resolve, an_unknown_key_is_refused) {
     ASSERT_TRUE(is_refused_with(document, "unknown key 'extra'"));
 }
 
+UTEST(resolve, install_choices_survive_json) {
+    char document[1024];
+    snprintf(document, sizeof document, COMPLETE_DOCUMENT,
+             ", \"choices\": {\"storage\": {\"node\": \"data-disk\", \"path\": \"/data\", \"threshold\": 50}}");
+    resolved_setup resolved;
+    resolved_setup again;
+    error_list errors;
+    error_list_init(&errors);
+    ASSERT_TRUE(resolved_setup_from_json(document, "hand-over.json", &resolved, &errors));
+    char *json = resolved_setup_to_json(&resolved);
+    ASSERT_TRUE(resolved_setup_from_json(json, "again.json", &again, &errors));
+    ASSERT_TRUE(again.choices != NULL);
+    ASSERT_TRUE(document_equal(resolved.choices, again.choices));
+    ASSERT_STREQ("/data", document_get(document_get(again.choices, "storage"), "path")->string_value);
+    free(json);
+    resolved_setup_free(&resolved);
+    resolved_setup_free(&again);
+    error_list_free(&errors);
+}
+
+UTEST(resolve, choices_that_are_not_an_object_are_refused) {
+    char document[1024];
+    snprintf(document, sizeof document, COMPLETE_DOCUMENT, ", \"choices\": 1");
+    ASSERT_TRUE(is_refused_with(document, "choices"));
+}
+
 UTEST(resolve, a_missing_format_is_reported_as_missing) {
     ASSERT_TRUE(is_refused_with("{\"name\": \"n\", \"setup\": {}}", "missing required key 'format'"));
+}
+
+UTEST(resolve, window_manager_dotfiles_resolve_and_survive_json) {
+    resolved_setup resolved;
+    resolved_setup again;
+    error_list errors;
+    error_list_init(&errors);
+    ASSERT_TRUE(resolve_named(DATA, DATA, "workstation", &resolved, &errors));
+    ASSERT_EQ((size_t)1, resolved.dotfiles.count);
+    ASSERT_STREQ("dotfiles/i3/config", resolved.dotfiles.items[0].source);
+    ASSERT_STREQ(".config/i3/config", resolved.dotfiles.items[0].target);
+    char *json = resolved_setup_to_json(&resolved);
+    ASSERT_TRUE(resolved_setup_from_json(json, "workstation.json", &again, &errors));
+    ASSERT_EQ((size_t)1, again.dotfiles.count);
+    ASSERT_STREQ("dotfiles/i3/config", again.dotfiles.items[0].source);
+    ASSERT_STREQ(".config/i3/config", again.dotfiles.items[0].target);
+    free(json);
+    resolved_setup_free(&resolved);
+    resolved_setup_free(&again);
+    error_list_free(&errors);
+}
+
+UTEST(resolve, a_dotfile_without_a_target_is_refused) {
+    char document[1024];
+    snprintf(document, sizeof document, COMPLETE_DOCUMENT, "");
+    char *broken = text_format("%.*s\"dotfiles\": [{\"source\": \"dotfiles/i3/config\"}]%s",
+                               (int)(strstr(document, "\"dotfiles\": []") - document), document,
+                               strstr(document, "\"dotfiles\": []") + strlen("\"dotfiles\": []"));
+    ASSERT_TRUE(is_refused_with(broken, "target"));
+    free(broken);
 }

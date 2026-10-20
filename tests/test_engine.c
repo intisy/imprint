@@ -71,7 +71,7 @@ UTEST(engine, another_format_is_exit_1) {
     const char *const arguments[] = { "imprint-engine", "plan", IMPRINT_TEST_FIXTURES "/resolved/old-format.json" };
     engine_result result = run(arguments, COUNT_OF(arguments));
     ASSERT_EQ(IMPRINT_EXIT_INVALID, result.exit_code);
-    ASSERT_TRUE(strstr(result.error_output, "format 99 is not 1") != NULL);
+    ASSERT_TRUE(strstr(result.error_output, "format 99 is not 2") != NULL);
     result_free(&result);
 }
 

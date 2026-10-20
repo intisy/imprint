@@ -20,6 +20,10 @@ set(IMPRINT_TEST_SOURCES
     test_hook.c
     test_firstboot.c
     test_hook_cli.c
+    fake_runner.c
+    test_install_parts.c
+    test_install_run.c
+    test_storage_choice.c
 )
 
 add_executable(imprint-tests ${IMPRINT_TEST_SOURCES})
@@ -46,6 +50,12 @@ add_test(NAME plan_round_trip
         -DFIXTURES=${CMAKE_CURRENT_SOURCE_DIR}/fixtures
         -DWORK=${CMAKE_CURRENT_BINARY_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/integration/plan_round_trip.cmake)
+
+if(NOT WIN32)
+    add_test(NAME stick_install
+        COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/integration/stick-install.sh $<TARGET_FILE:imprint>
+            ${CMAKE_CURRENT_SOURCE_DIR}/fixtures ${CMAKE_CURRENT_BINARY_DIR}/stick-install)
+endif()
 
 add_executable(imprint-parity-tests parity/test_parity.c)
 target_link_libraries(imprint-parity-tests PRIVATE imprint_core imprint_warnings)

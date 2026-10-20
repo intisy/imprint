@@ -11,6 +11,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <termios.h>
 #include <unistd.h>
 
 bool platform_is_directory(const char *path) {
@@ -207,4 +208,18 @@ int platform_run_streaming(const char *const *arguments, FILE *output, error_lis
 
 bool platform_terminal_is_interactive(FILE *stream) {
     return isatty(fileno(stream)) != 0;
+}
+
+bool platform_set_echo(FILE *input, bool enabled) {
+    struct termios settings;
+    int descriptor = fileno(input);
+    if (!isatty(descriptor) || tcgetattr(descriptor, &settings) != 0) {
+        return false;
+    }
+    if (enabled) {
+        settings.c_lflag |= (tcflag_t)ECHO;
+    } else {
+        settings.c_lflag &= ~(tcflag_t)ECHO;
+    }
+    return tcsetattr(descriptor, TCSANOW, &settings) == 0;
 }

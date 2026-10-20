@@ -352,3 +352,27 @@ UTEST(ui_scripted, a_cancel_answer_alone_is_not_exhaustion) {
     ASSERT_FALSE(ui_scripted_exhausted(scripted));
     ui_destroy(scripted);
 }
+
+UTEST(ui, a_secret_is_read_and_never_written_back) {
+    terminal opened = open_terminal("hunter22\n", false);
+    char *answer = NULL;
+    ASSERT_TRUE(ui_secret(opened.interface, "password", &answer));
+    ASSERT_STREQ("hunter22", answer);
+    char *shown = close_terminal(&opened);
+    ASSERT_TRUE(strstr(shown, "password (not shown): ") != NULL);
+    ASSERT_TRUE(strstr(shown, "hunter22") == NULL);
+    free(shown);
+    free(answer);
+}
+
+UTEST(ui, the_scripted_secret_keeps_the_answer_out_of_the_transcript) {
+    const char *const answers[] = { "hunter22" };
+    ui *scripted = ui_scripted_create(answers, 1);
+    char *answer = NULL;
+    ASSERT_TRUE(ui_secret(scripted, "password", &answer));
+    ASSERT_STREQ("hunter22", answer);
+    ASSERT_TRUE(strstr(ui_scripted_transcript(scripted), "secret: password") != NULL);
+    ASSERT_TRUE(strstr(ui_scripted_transcript(scripted), "hunter22") == NULL);
+    free(answer);
+    ui_destroy(scripted);
+}

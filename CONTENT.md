@@ -32,6 +32,9 @@ A setup's hooks run after those of the setup it `extends`, in the order written;
 listed twice runs once. A stage stops at the first script that fails and exits with its code.
 Each script runs with `sh` and gets `IMPRINT_SETUP` (the resolved setup as JSON), `IMPRINT_DATA`
 (the data repo), `IMPRINT_PERSONAL` (the stick's `personal/` folder) and `IMPRINT_STAGE`.
+After a disk install the resolved setup also carries what the review screen chose, under
+`choices`: `choices.storage` is `{"node": "data-disk" | "folder" | "none", "path", "threshold",
+"join"}`, with `path` only for a node and `join` false without one.
 
 `firstboot` hooks run as root after `network-online.target`, from `imprint-firstboot.service`
 in the installed system: it removes itself once every hook succeeded and runs all of them again
