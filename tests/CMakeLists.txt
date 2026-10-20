@@ -50,6 +50,12 @@ add_test(NAME plan_round_trip
         -DWORK=${CMAKE_CURRENT_BINARY_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/integration/plan_round_trip.cmake)
 
+if(NOT WIN32)
+    add_test(NAME stick_install
+        COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/integration/stick-install.sh $<TARGET_FILE:imprint>
+            ${CMAKE_CURRENT_SOURCE_DIR}/fixtures ${CMAKE_CURRENT_BINARY_DIR}/stick-install)
+endif()
+
 add_executable(imprint-parity-tests parity/test_parity.c)
 target_link_libraries(imprint-parity-tests PRIVATE imprint_core imprint_warnings)
 add_test(NAME parity COMMAND imprint-parity-tests ${CMAKE_CURRENT_SOURCE_DIR}/parity/root ${CMAKE_CURRENT_SOURCE_DIR}/parity)

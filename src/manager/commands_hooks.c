@@ -8,6 +8,7 @@
 #include "platform.h"
 #include "resolve.h"
 #include "setup.h"
+#include "stick_installer.h"
 #include "workspace.h"
 
 #include <stdio.h>
@@ -148,14 +149,19 @@ static bool write_bundle(const prepared_setup *prepared, const char *directory, 
     char *setup_file = path_join(directory, setup_name);
     char *data_copy = path_join(directory, "data");
     char *engine_copy = path_join(directory, "imprint-engine");
+    char *installer = path_join(directory, STICK_INSTALLER_NAME);
+    char *installer_text = stick_installer_text(prepared->resolved.name);
     bool written = directory_make_all(directory, errors) && file_write_text(setup_file, prepared->json, errors) &&
                    directory_make_all(data_copy, errors) && file_tree_copy(prepared->data_directory, data_copy, errors) &&
+                   file_write_text(installer, installer_text, errors) && platform_set_mode(installer, 0755, errors) &&
                    (engine == NULL || (file_copy(engine, engine_copy, errors) &&
                                        platform_set_mode(engine_copy, 0755, errors)));
     free(setup_name);
     free(setup_file);
     free(data_copy);
     free(engine_copy);
+    free(installer);
+    free(installer_text);
     return written;
 }
 
@@ -172,8 +178,8 @@ int command_bundle(const char *root, const char *name, const char *directory, co
         exit_code = write_bundle(&prepared, directory, engine, &errors) ? IMPRINT_EXIT_OK : IMPRINT_EXIT_ENVIRONMENT;
     }
     if (exit_code == IMPRINT_EXIT_OK) {
-        fprintf(context->output, "wrote %s/%s.json, %s/data%s: copy %s to <stick>/imprint/\n", directory, name, directory,
-                engine == NULL ? "" : " and imprint-engine", directory);
+        fprintf(context->output, "wrote %s/%s.json, %s/data, %s%s: copy %s to <stick>/imprint/\n", directory, name,
+                directory, STICK_INSTALLER_NAME, engine == NULL ? "" : " and imprint-engine", directory);
     }
     prepared_free(&prepared);
     return command_finish(context, &errors, exit_code);

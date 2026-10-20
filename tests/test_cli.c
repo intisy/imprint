@@ -247,6 +247,12 @@ UTEST(cli, bundle_writes_the_setup_the_data_repo_and_the_engine) {
     ASSERT_TRUE(file_read_all(IMPRINT_TEST_WORK "/bundle/imprint-engine", &engine, &errors));
     char *setup = NULL;
     ASSERT_TRUE(file_read_all(IMPRINT_TEST_WORK "/bundle/data/setups/workstation.toml", &setup, &errors));
+    char *installer = NULL;
+    ASSERT_TRUE(file_read_all(IMPRINT_TEST_WORK "/bundle/install.sh", &installer, &errors));
+    ASSERT_TRUE(contains(installer, "setup=workstation\n"));
+    ASSERT_TRUE(contains(installer, "imprint-engine\" install \"$bundle/$setup.json\" \"$@\""));
+    ASSERT_FALSE(contains(installer, "\r"));
+    free(installer);
     free(setup);
     free(engine);
     document_free(parsed);
