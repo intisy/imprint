@@ -2,6 +2,7 @@
 
 #include "commands.h"
 #include "exit_codes.h"
+#include "options.h"
 #include "platform.h"
 
 #include <stdlib.h>
@@ -16,8 +17,13 @@ static const char USAGE[] =
     "  validate                      check the catalog and every setup\n"
     "  data use [owner/repo[@ref]]   point data/ at a data repo; without one, back to the template\n"
     "  catalog update                move the catalog pin to the newest imprint-catalog commit\n"
+    "  hooks run <stage> <name> [--personal PERSONAL]\n"
+    "                                run the setup's hooks of one stage (build, install, firstboot, session)\n"
+    "  hooks install-firstboot <name> --target ROOT [--personal PERSONAL]\n"
+    "                                make an installed system at ROOT run the firstboot hooks on its next boot\n"
     "\n"
-    "DIR defaults to IMPRINT_ROOT, else the current directory. Without a command, imprint opens a menu.\n";
+    "DIR defaults to IMPRINT_ROOT, else the current directory. Without a command, imprint opens a menu.\n"
+    "PERSONAL is the stick's personal/ folder, handed to hooks as IMPRINT_PERSONAL.\n";
 
 typedef struct invocation {
     const char *root;
@@ -107,6 +113,30 @@ static int run_catalog(const invocation *parsed, cli_context *context) {
     return command_catalog_update(parsed->root, context);
 }
 
+static int run_hooks(const invocation *parsed, cli_context *context) {
+    bool is_run = word_is(parsed, 1, "run");
+    if (!is_run && !word_is(parsed, 1, "install-firstboot")) {
+        return usage_error(context, "unknown hooks command", parsed->word_count > 1 ? parsed->words[1] : "");
+    }
+    size_t first_option = is_run ? 4 : 3;
+    if (parsed->word_count < first_option) {
+        return usage_error(context, "missing arguments for hooks", parsed->words[1]);
+    }
+    named_option options[] = { { "--personal", NULL }, { "--target", NULL } };
+    const char *problem_word = NULL;
+    if (!options_read(parsed->words + first_option, parsed->word_count - first_option, options, is_run ? 1 : 2,
+                      &problem_word)) {
+        return usage_error(context, "unknown option or one without a value", problem_word);
+    }
+    if (is_run) {
+        return command_hooks_run(parsed->root, parsed->words[2], parsed->words[3], options[0].value, context);
+    }
+    if (options[1].value == NULL) {
+        return usage_error(context, "a target root must follow --target for", "hooks install-firstboot");
+    }
+    return command_hooks_install_firstboot(parsed->root, parsed->words[2], options[1].value, options[0].value, context);
+}
+
 static int run_alone(const invocation *parsed, cli_context *context, int (*command)(const char *, cli_context *)) {
     if (parsed->word_count > 1) {
         return usage_error(context, "too many arguments for", parsed->words[0]);
@@ -138,6 +168,9 @@ int cli_run(int argument_count, const char *const *arguments, cli_context *conte
     }
     if (strcmp(command, "catalog") == 0) {
         return run_catalog(&parsed, context);
+    }
+    if (strcmp(command, "hooks") == 0) {
+        return run_hooks(&parsed, context);
     }
     if (strcmp(command, "help") == 0) {
         fputs(USAGE, context->output);

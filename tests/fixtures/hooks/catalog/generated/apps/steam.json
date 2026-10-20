@@ -1,0 +1,3 @@
+{ "id": "steam", "name": "Steam", "category": "media", "tags": ["gaming"],
+  "install": { "arch": { "packages": ["steam"],
+    "repo_setup": ["printf '[multilib]\\nInclude = /etc/pacman.d/mirrorlist\\n' >> /etc/pacman.conf"] } } }

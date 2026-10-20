@@ -1,0 +1,2 @@
+{ "id": "git", "name": "Git", "category": "development",
+  "install": { "arch": { "packages": ["git", "base-devel"] }, "debian": { "packages": ["git", "build-essential"] } } }

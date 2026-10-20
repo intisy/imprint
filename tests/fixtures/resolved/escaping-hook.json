@@ -1,0 +1,1 @@
+{ "format": 1, "name": "bad", "distro": "arch", "package_manager": "pacman", "bootloader": "grub", "window_managers": [], "apps": [], "packages": [], "aur": [], "flatpak": [], "repo_setup": [], "services": [], "user_services": [], "skipped": [], "setup": { "hooks": [{ "stage": "firstboot", "script": "../escape.sh" }] } }

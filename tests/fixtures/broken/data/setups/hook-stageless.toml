@@ -1,0 +1,5 @@
+distro = "arch"
+
+[[hooks]]
+script = "hooks/present.sh"
+

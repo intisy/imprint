@@ -1,0 +1,15 @@
+[Unit]
+Description=imprint firstboot hooks of the setup hooked
+Wants=network-online.target
+After=network-online.target
+ConditionPathExists=/var/lib/imprint/firstboot/run.sh
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh /var/lib/imprint/firstboot/run.sh
+StandardOutput=journal+console
+StandardError=journal+console
+TimeoutStartSec=infinity
+
+[Install]
+WantedBy=multi-user.target

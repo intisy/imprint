@@ -1,0 +1,6 @@
+distro = "arch"
+apps = ["git"]
+
+[[hooks]]
+stage = "session"
+script = "hooks/show-environment.sh"
