@@ -203,6 +203,11 @@ static bool has_database(const char *sync_directory, const char *repository) {
     return present;
 }
 
+/** @implNote A stand-in newer than the stick's database looks up to date to pacman, which then never reads the stick. */
+static bool is_stick_repository(const char *name) {
+    return strcmp(name, "offline") == 0 || strcmp(name, "offline-aur") == 0;
+}
+
 static void append_line(const char *path, const char *line, error_list *errors) {
     char *text = NULL;
     if (!platform_is_file(path) || !file_read_all(path, &text, errors)) {
@@ -225,7 +230,7 @@ void offline_stand_in_missing_databases(command_runner *runner, const char *targ
     char *stand_in_list = path_join(sync_directory, STAND_IN_LIST);
     directory_make_all(sync_directory, errors);
     for (char *name = strtok(repositories, "\r\n"); name != NULL; name = strtok(NULL, "\r\n")) {
-        if (has_database(sync_directory, name)) {
+        if (is_stick_repository(name) || has_database(sync_directory, name)) {
             continue;
         }
         char *database = text_format("%s/%s.db", sync_directory, name);

@@ -12,7 +12,8 @@ usage: disk-install.sh ISO STICK BUNDLE WORK
   BUNDLE  the directory `imprint bundle <setup> BUNDLE --engine <static imprint-engine>` wrote
   WORK    a directory for the disks, logs and the result
 environment: IMPRINT_VM_PASSWORD (default imprint4test), IMPRINT_VM_MEMORY_MB (default 6144),
-             IMPRINT_VM_INSTALL_TIMEOUT (seconds, default 14400)
+             IMPRINT_VM_INSTALL_TIMEOUT (seconds, default 14400),
+             IMPRINT_VM_REUSE_INSTALL=1 (skip the install, log in and verify the disks already in WORK)
 TEXT
     exit 2
 }
@@ -157,12 +158,16 @@ name=$(setup_name)
 [ -n "$name" ] || fail "no <setup>.json in $bundle"
 say "installing $name from $stick, offline"
 make_test_disk "$name"
-make_disks
 set_common_devices
-run_live guest-install.sh "$install_timeout" "$work/install-serial.log"
-read_result install
-[ "$(cat "$work/install.exit" 2>/dev/null)" = 0 ] || fail "imprint-engine install failed, see $work/install.log"
-say "install passed; logging in through the display manager"
+if [ "${IMPRINT_VM_REUSE_INSTALL:-0}" = 1 ]; then
+    say "reusing the installed disks in $work"
+else
+    make_disks
+    run_live guest-install.sh "$install_timeout" "$work/install-serial.log"
+    read_result install
+    [ "$(cat "$work/install.exit" 2>/dev/null)" = 0 ] || fail "imprint-engine install failed, see $work/install.log"
+    say "install passed; logging in through the display manager"
+fi
 login_through_display_manager
 say "verifying the installed system"
 run_live guest-verify.sh 1800 "$work/verify-serial.log"

@@ -353,7 +353,10 @@ UTEST(install_offline, attach_then_detach_leaves_the_target_as_it_was) {
     ASSERT_TRUE(strstr(attached, "[offline]\nServer = file:///var/lib/imprint-offline\n\n[offline-aur]\nSigLevel = "
                                  "Optional TrustAll\nServer = file:///var/lib/imprint-offline-aur\n\n[core]") != NULL);
     offline_stand_in_missing_databases(&runner, target, &errors);
-    ASSERT_EQ((size_t)3, fake_runner_count(&runner, "tar -czf"));
+    ASSERT_EQ((size_t)1, fake_runner_count(&runner, "tar -czf"));
+    char *aur_stand_in = text_format("tar -czf %s/var/lib/pacman/sync/offline-aur.db", target);
+    ASSERT_EQ((size_t)0, fake_runner_count(&runner, aur_stand_in));
+    free(aur_stand_in);
     offline_detach(&runner, &stick, target, &errors);
     char *detached = read_fixture(conf_path);
     char *mirror_path = path_join(target, "etc/pacman.d/mirrorlist");
