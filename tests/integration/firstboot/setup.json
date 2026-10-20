@@ -1,0 +1,19 @@
+{
+  "format": 1,
+  "name": "boot-test",
+  "distro": "debian",
+  "package_manager": "apt",
+  "bootloader": "grub",
+  "window_managers": [],
+  "apps": [],
+  "packages": [],
+  "aur": [],
+  "flatpak": [],
+  "repo_setup": [],
+  "services": [],
+  "user_services": [],
+  "skipped": [],
+  "setup": {
+    "hooks": [{ "stage": "firstboot", "script": "hooks/count.sh" }, { "stage": "firstboot", "script": "hooks/flaky.sh" }]
+  }
+}

@@ -1,0 +1,5 @@
+distro = "arch"
+
+[[hooks]]
+stage = "firstboot"
+script = "hooks/my hook.sh"

@@ -1,0 +1,3 @@
+{ "id": "mangohud", "name": "MangoHud", "category": "gaming",
+  "install": { "arch": { "packages": ["mangohud", "lib32-mangohud"],
+    "repo_setup": ["printf '[multilib]\\nInclude = /etc/pacman.d/mirrorlist\\n' >> /etc/pacman.conf"] } } }

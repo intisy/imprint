@@ -1,0 +1,9 @@
+extends = "hooked-base"
+
+[[hooks]]
+stage = "firstboot"
+script = "hooks/fails.sh"
+
+[[hooks]]
+stage = "firstboot"
+script = "hooks/never.sh"

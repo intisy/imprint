@@ -1,0 +1,2 @@
+{ "id": "obsidian", "name": "Obsidian", "category": "utilities",
+  "install": { "arch": { "flatpak": ["md.obsidian.Obsidian"] } } }

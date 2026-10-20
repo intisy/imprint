@@ -23,3 +23,15 @@ char *platform_read_stream(FILE *stream) {
     buffer[length] = '\0';
     return buffer;
 }
+
+bool platform_copy_stream(FILE *from, FILE *to) {
+    char buffer[4096];
+    size_t read = 0;
+    while ((read = fread(buffer, 1, sizeof buffer, from)) > 0) {
+        if (fwrite(buffer, 1, read, to) != read) {
+            return false;
+        }
+        fflush(to);
+    }
+    return ferror(from) == 0;
+}

@@ -1,5 +1,5 @@
-/** @implNote popen, opendir and fileno are POSIX, hidden by a strict -std=c17 unless asked for. */
-#define _POSIX_C_SOURCE 200809L
+/** @implNote popen, opendir and fileno are POSIX and realpath is XSI, hidden by a strict -std=c17 unless asked for. */
+#define _XOPEN_SOURCE 700
 
 #include "platform.h"
 
@@ -23,7 +23,7 @@ bool platform_is_file(const char *path) {
     return stat(path, &information) == 0 && S_ISREG(information.st_mode);
 }
 
-bool platform_list_files(const char *directory, string_list *names, error_list *errors) {
+static bool list_entries(const char *directory, bool want_directories, string_list *names, error_list *errors) {
     DIR *handle = opendir(directory);
     if (handle == NULL) {
         error_push(errors, directory, 0, "cannot open the directory: %s", strerror(errno));
@@ -35,7 +35,7 @@ bool platform_list_files(const char *directory, string_list *names, error_list *
             continue;
         }
         char *path = path_join(directory, entry->d_name);
-        if (platform_is_file(path)) {
+        if (want_directories ? platform_is_directory(path) : platform_is_file(path)) {
             string_list_add(names, entry->d_name);
         }
         free(path);
@@ -43,6 +43,71 @@ bool platform_list_files(const char *directory, string_list *names, error_list *
     closedir(handle);
     string_list_sort(names);
     return true;
+}
+
+bool platform_list_files(const char *directory, string_list *names, error_list *errors) {
+    return list_entries(directory, false, names, errors);
+}
+
+bool platform_list_directories(const char *directory, string_list *names, error_list *errors) {
+    return list_entries(directory, true, names, errors);
+}
+
+bool platform_make_directory(const char *path, error_list *errors) {
+    if (mkdir(path, 0755) == 0 || (errno == EEXIST && platform_is_directory(path))) {
+        return true;
+    }
+    error_push(errors, path, 0, "cannot create the directory: %s", strerror(errno));
+    return false;
+}
+
+bool platform_set_mode(const char *path, unsigned int mode, error_list *errors) {
+    if (chmod(path, (mode_t)mode) == 0) {
+        return true;
+    }
+    error_push(errors, path, 0, "cannot set the mode %o: %s", mode, strerror(errno));
+    return false;
+}
+
+bool platform_make_symlink(const char *target, const char *link_path, error_list *errors) {
+    struct stat information;
+    if (lstat(link_path, &information) == 0 && S_ISLNK(information.st_mode) && unlink(link_path) != 0) {
+        error_push(errors, link_path, 0, "cannot replace the link: %s", strerror(errno));
+        return false;
+    }
+    if (symlink(target, link_path) != 0) {
+        error_push(errors, link_path, 0, "cannot link to %s: %s", target, strerror(errno));
+        return false;
+    }
+    return true;
+}
+
+char *platform_absolute_path(const char *path, error_list *errors) {
+    char *resolved = realpath(path, NULL);
+    if (resolved == NULL) {
+        error_push(errors, path, 0, "cannot resolve the path: %s", strerror(errno));
+        return NULL;
+    }
+    char *copy = text_duplicate(resolved);
+    free(resolved);
+    return copy;
+}
+
+char *platform_temporary_path(error_list *errors) {
+    const char *directory = getenv("TMPDIR");
+    char *template = path_join(directory != NULL && directory[0] != '\0' ? directory : "/tmp", "imprint-XXXXXX");
+    int descriptor = mkstemp(template);
+    if (descriptor == -1) {
+        error_push(errors, template, 0, "cannot create a temporary file: %s", strerror(errno));
+        free(template);
+        return NULL;
+    }
+    close(descriptor);
+    return template;
+}
+
+void platform_set_environment(const char *name, const char *value) {
+    setenv(name, value, 1);
 }
 
 FILE *platform_temporary_file(void) {
@@ -82,7 +147,19 @@ static char *command_line(const char *const *arguments) {
     return line;
 }
 
-int platform_run_capture(const char *const *arguments, char **output, error_list *errors) {
+static int exit_status(int status, const char *program, error_list *errors) {
+    if (status == -1) {
+        error_push(errors, NULL, 0, "cannot wait for %s: %s", program, strerror(errno));
+        return -1;
+    }
+    if (!WIFEXITED(status)) {
+        error_push(errors, NULL, 0, "%s did not exit normally", program);
+        return -1;
+    }
+    return WEXITSTATUS(status);
+}
+
+static FILE *open_pipe(const char *const *arguments, error_list *errors) {
     char *line = command_line(arguments);
     char *joined = text_format("%s 2>&1", line);
     free(line);
@@ -90,26 +167,42 @@ int platform_run_capture(const char *const *arguments, char **output, error_list
     free(joined);
     if (pipe == NULL) {
         error_push(errors, NULL, 0, "cannot start %s: %s", arguments[0], strerror(errno));
+    }
+    return pipe;
+}
+
+int platform_run_capture(const char *const *arguments, char **output, error_list *errors) {
+    FILE *pipe = open_pipe(arguments, errors);
+    if (pipe == NULL) {
         return -1;
     }
     char *captured = platform_read_stream(pipe);
-    int status = pclose(pipe);
+    int status = exit_status(pclose(pipe), arguments[0], errors);
     if (captured == NULL) {
         error_push(errors, NULL, 0, "cannot read the output of %s", arguments[0]);
         return -1;
     }
     if (status == -1) {
         free(captured);
-        error_push(errors, NULL, 0, "cannot wait for %s: %s", arguments[0], strerror(errno));
-        return -1;
-    }
-    if (!WIFEXITED(status)) {
-        free(captured);
-        error_push(errors, NULL, 0, "%s did not exit normally", arguments[0]);
         return -1;
     }
     *output = captured;
-    return WEXITSTATUS(status);
+    return status;
+}
+
+int platform_run_streaming(const char *const *arguments, FILE *output, error_list *errors) {
+    fflush(output);
+    FILE *pipe = open_pipe(arguments, errors);
+    if (pipe == NULL) {
+        return -1;
+    }
+    bool copied = platform_copy_stream(pipe, output);
+    int status = exit_status(pclose(pipe), arguments[0], errors);
+    if (!copied) {
+        error_push(errors, NULL, 0, "cannot pass on the output of %s", arguments[0]);
+        return -1;
+    }
+    return status;
 }
 
 bool platform_terminal_is_interactive(FILE *stream) {

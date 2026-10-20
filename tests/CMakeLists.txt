@@ -17,12 +17,16 @@ set(IMPRINT_TEST_SOURCES
     cli_harness.c
     test_cli.c
     test_cli_git.c
+    test_hook.c
+    test_firstboot.c
+    test_hook_cli.c
 )
 
 add_executable(imprint-tests ${IMPRINT_TEST_SOURCES})
 target_link_libraries(imprint-tests PRIVATE imprint_engine imprint_manager imprint_ui imprint_core imprint_utest imprint_warnings)
 # Under wine a path starting with / resolves on drive Z:, which wine maps to the Linux root.
-target_compile_definitions(imprint-tests PRIVATE IMPRINT_TEST_FIXTURES="${CMAKE_CURRENT_SOURCE_DIR}/fixtures")
+target_compile_definitions(imprint-tests PRIVATE IMPRINT_TEST_FIXTURES="${CMAKE_CURRENT_SOURCE_DIR}/fixtures"
+    IMPRINT_TEST_WORK="${CMAKE_CURRENT_BINARY_DIR}/work")
 add_executable(argument_echo argument_echo.c)
 target_link_libraries(argument_echo PRIVATE imprint_warnings)
 add_dependencies(imprint-tests argument_echo)

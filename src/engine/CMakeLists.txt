@@ -1,4 +1,4 @@
-add_library(imprint_engine STATIC engine.c plan.c)
+add_library(imprint_engine STATIC engine.c engine_hooks.c plan.c)
 target_include_directories(imprint_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(imprint_engine PUBLIC imprint_core PRIVATE imprint_warnings)
 

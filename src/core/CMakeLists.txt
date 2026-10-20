@@ -13,6 +13,10 @@ add_library(imprint_core STATIC
     setup_merge.c
     setup.c
     resolve.c
+    hook.c
+    file_tree.c
+    firstboot.c
+    options.c
 )
 if(WIN32)
     target_sources(imprint_core PRIVATE platform_windows.c)
