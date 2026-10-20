@@ -188,6 +188,9 @@ UTEST(install_run, a_disk_swapped_after_the_review_is_refused) {
     fixture_close(&fixture);
 }
 
+/* The firstboot bundle links its unit, which needs a Linux root (platform_windows.c refuses). */
+#ifndef _WIN32
+
 /** The fixture setup with a firstboot hook, so the install writes the bundle that carries `choices`. */
 static char *hooked_setup_file(void) {
     error_list errors;
@@ -357,3 +360,5 @@ UTEST(install_storage, none_saves_no_path_and_no_join) {
     error_list_free(&errors);
     fixture_close(&fixture);
 }
+
+#endif
