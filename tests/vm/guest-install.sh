@@ -1,0 +1,24 @@
+#!/bin/bash
+# Runs in the live VM: puts the bundle on the stick as a person would, then installs from the stick.
+set -u
+exec > >(tee /run/t/install.log > /dev/ttyS0) 2>&1
+
+finish() {
+    echo "$1" > /run/t/install.exit
+    sync
+    exit 0
+}
+
+udevadm settle
+stick_partition=$(blkid -L Ventoy) || { echo "no partition labelled Ventoy"; finish 3; }
+mkdir -p /run/stick
+mount "$stick_partition" /run/stick || finish 3
+rm -rf /run/stick/imprint
+mkdir -p /run/stick/imprint
+cp -r /run/t/bundle/. /run/stick/imprint/
+sync
+mount -o remount,ro /run/stick || finish 3
+name=$(cat /run/t/setup-name)
+lsblk -o NAME,SIZE,TYPE,TRAN,MODEL
+/run/stick/imprint/imprint-engine install "/run/stick/imprint/$name.json" --answers /run/t/answers.txt
+finish $?
