@@ -13,6 +13,7 @@ void install_options_init(install_options *options) {
     string_list_init(&options->user_groups);
     string_list_init(&options->authorized_keys);
     string_list_init(&options->notes);
+    storage_choice_init(&options->storage);
 }
 
 void install_options_free(install_options *options) {
@@ -33,6 +34,7 @@ void install_options_free(install_options *options) {
     string_list_free(&options->user_groups);
     string_list_free(&options->authorized_keys);
     string_list_free(&options->notes);
+    storage_choice_free(&options->storage);
     install_options_init(options);
 }
 

@@ -2,6 +2,7 @@
 #define IMPRINT_INSTALL_OPTIONS_H
 
 #include "resolve.h"
+#include "storage_choice.h"
 
 typedef enum root_filesystem { ROOT_EXT4, ROOT_BTRFS } root_filesystem;
 
@@ -40,6 +41,7 @@ typedef struct install_options {
     string_list notes;
     setup_user *users;
     size_t user_count;
+    storage_choice storage;
 } install_options;
 
 void install_options_init(install_options *options);

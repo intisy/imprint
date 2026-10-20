@@ -14,6 +14,9 @@ enum review_field {
     FIELD_ROOT_FILESYSTEM,
     FIELD_SWAP,
     FIELD_DATA_PARTITION,
+    FIELD_STORAGE_NODE,
+    FIELD_STORAGE_THRESHOLD,
+    FIELD_STORAGE_JOIN,
     FIELD_COUNT
 };
 
@@ -48,6 +51,32 @@ static char *data_line(const install_options *options, const disk_list *disks) {
                        options->data_filesystem, options->data_label, options->data_mount, options->root_size_mb);
 }
 
+static char *storage_node_line(const install_options *options) {
+    const storage_choice *storage = &options->storage;
+    switch (storage->node) {
+    case STORAGE_NODE_DATA_DISK: return text_format("storage node:  the data partition at %s", options->data_mount);
+    case STORAGE_NODE_FOLDER: return text_format("storage node:  the folder %s", storage->folder_path);
+    default: return text_duplicate("storage node:  none, this device does not join the storage network");
+    }
+}
+
+static char *storage_threshold_line(const storage_choice *storage) {
+    return text_format("threshold:     %lld, %s (essential 80+, working 50+, archive 1+)", storage->threshold,
+                       storage_threshold_bands(storage->threshold));
+}
+
+static char *storage_join_line(const storage_choice *storage) {
+    if (storage->node == STORAGE_NODE_NONE) {
+        return text_duplicate("join:          no, there is no storage node");
+    }
+    if (!storage->join) {
+        return text_duplicate("join:          no");
+    }
+    return text_format("join:          yes, at the first boot%s",
+                       storage->tailscale_key_on_stick ? ", with the stick's Tailscale key"
+                                                       : " (no Tailscale key on the stick)");
+}
+
 static bool has_password(const install_options *options) {
     return options->password != NULL || options->password_hash != NULL;
 }
@@ -64,6 +93,9 @@ static void build_items(const install_options *options, const disk_list *disks, 
                                                options->root_fs == ROOT_BTRFS ? ", with snapshots" : "");
     items[FIELD_SWAP] = text_format("swap:          %lld MiB", options->swap_size_mb);
     items[FIELD_DATA_PARTITION] = data_line(options, disks);
+    items[FIELD_STORAGE_NODE] = storage_node_line(options);
+    items[FIELD_STORAGE_THRESHOLD] = storage_threshold_line(&options->storage);
+    items[FIELD_STORAGE_JOIN] = storage_join_line(&options->storage);
 }
 
 static void free_items(char **items) {
@@ -196,6 +228,90 @@ static void edit_root_filesystem(ui *screen, install_options *options) {
     }
 }
 
+static void edit_storage_folder(ui *screen, storage_choice *storage) {
+    char *answer = NULL;
+    if (ui_text(screen, "the folder that becomes the storage node (an absolute path)", storage->folder_path, &answer) &&
+        answer != NULL) {
+        error_list errors;
+        error_list_init(&errors);
+        if (storage_folder_path_check(answer, &errors)) {
+            install_options_replace(&storage->folder_path, answer);
+            storage->node = STORAGE_NODE_FOLDER;
+            storage->node_edited = true;
+        } else {
+            ui_log(screen, UI_ERROR, errors.items[0].message);
+        }
+        error_list_free(&errors);
+    }
+    free(answer);
+}
+
+static void edit_storage_node(ui *screen, install_options *options) {
+    storage_choice *storage = &options->storage;
+    char *data_choice = options->data_label != NULL
+                            ? text_format("the data partition, at %s", options->data_mount)
+                            : text_duplicate("the data partition (off in this install)");
+    const char *const choices[] = { data_choice, "a folder", "none: this device does not join the storage network" };
+    size_t preselected = storage->node == STORAGE_NODE_DATA_DISK ? 0 : storage->node == STORAGE_NODE_FOLDER ? 1 : 2;
+    size_t chosen = 0;
+    if (ui_choose_one(screen, "the drive or folder this device keeps in the storage network", choices,
+                      COUNT_OF(choices), preselected, &chosen)) {
+        if (chosen == 1) {
+            edit_storage_folder(screen, storage);
+        } else if (chosen == 0 && options->data_label == NULL) {
+            ui_log(screen, UI_WARNING, "the data partition is off; turn it on under data first");
+        } else {
+            storage->node = chosen == 0 ? STORAGE_NODE_DATA_DISK : STORAGE_NODE_NONE;
+            storage->node_edited = true;
+        }
+    }
+    free(data_choice);
+}
+
+static bool confirm_keep_everything(ui *screen) {
+    bool keep_everything = false;
+    return ui_confirm(screen, "threshold 0 keeps EVERYTHING the storage network holds, backups and archives included. "
+                      "Keep everything?", false, &keep_everything) && keep_everything;
+}
+
+static void edit_storage_threshold(ui *screen, storage_choice *storage) {
+    char *current = text_format("%lld", storage->threshold);
+    char *answer = NULL;
+    long long threshold = 0;
+    error_list errors;
+    error_list_init(&errors);
+    if (ui_text(screen, "threshold, 0 to 100 (essential 80+, working 50+, archive 1+, 0 keeps everything)", current,
+                &answer)) {
+        if (!storage_threshold_parse(answer, &threshold, &errors)) {
+            ui_log(screen, UI_WARNING, errors.items[0].message);
+        } else if (threshold == 0 && !confirm_keep_everything(screen)) {
+            ui_log(screen, UI_INFORMATION, "the threshold was not changed");
+        } else {
+            storage->threshold = threshold;
+        }
+    }
+    error_list_free(&errors);
+    free(current);
+    free(answer);
+}
+
+static void edit_storage_join(ui *screen, storage_choice *storage) {
+    if (storage->node == STORAGE_NODE_NONE) {
+        ui_log(screen, UI_INFORMATION, "choose a storage node first; without one this device does not join");
+        return;
+    }
+    bool join = storage->join;
+    if (!ui_confirm(screen, "join the storage network at the first boot?", storage->join, &join)) {
+        return;
+    }
+    storage->join = join;
+    storage->join_edited = true;
+    if (join && !storage->tailscale_key_on_stick) {
+        ui_log(screen, UI_WARNING, "no personal/tailscale.key on the stick: the first boot joins only if the device is "
+               "on the tailnet already, and tries again on every boot until it is");
+    }
+}
+
 static bool ready_to_start(ui *screen, const install_options *options, const disk_list *disks, const char *stick_disk) {
     if (!has_password(options)) {
         ui_log(screen, UI_WARNING, "set the user's password first (it is never defaulted)");
@@ -224,12 +340,16 @@ static void edit_field(ui *screen, size_t field, install_options *options, const
     case FIELD_ROOT_FILESYSTEM: edit_root_filesystem(screen, options); break;
     case FIELD_SWAP: edit_number(screen, "swap in MiB", &options->swap_size_mb); break;
     case FIELD_DATA_PARTITION: edit_data(screen, options, disks, stick_disk); break;
+    case FIELD_STORAGE_NODE: edit_storage_node(screen, options); break;
+    case FIELD_STORAGE_THRESHOLD: edit_storage_threshold(screen, &options->storage); break;
+    case FIELD_STORAGE_JOIN: edit_storage_join(screen, &options->storage); break;
     default: break;
     }
 }
 
 bool install_review(ui *screen, install_options *options, const disk_list *disks, const char *stick_disk) {
     for (;;) {
+        storage_choice_follow_defaults(&options->storage, options->data_label != NULL);
         char *items[FIELD_COUNT];
         build_items(options, disks, items);
         size_t chosen = 0;

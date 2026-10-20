@@ -187,3 +187,173 @@ UTEST(install_run, a_disk_swapped_after_the_review_is_refused) {
     error_list_free(&errors);
     fixture_close(&fixture);
 }
+
+/** The fixture setup with a firstboot hook, so the install writes the bundle that carries `choices`. */
+static char *hooked_setup_file(void) {
+    error_list errors;
+    error_list_init(&errors);
+    char *json = NULL;
+    resolved_setup resolved;
+    file_read_all(INSTALL_FIXTURES "/workstation.json", &json, &errors);
+    resolved_setup_from_json(json, "workstation.json", &resolved, &errors);
+    document_node *hooks = document_new_array(NULL, 0);
+    document_node *hook = document_new_table(NULL, 0);
+    document_table_set(hook, "stage", document_new_string("firstboot", NULL, 0));
+    document_table_set(hook, "script", document_new_string("hooks/storage-join.sh", NULL, 0));
+    document_array_append(hooks, hook);
+    document_table_set(resolved.setup, "hooks", hooks);
+    char *hooked = resolved_setup_to_json(&resolved);
+    char *path = path_join(IMPRINT_TEST_WORK, "hooked-workstation.json");
+    file_write_text(path, hooked, &errors);
+    error_list_print(&errors, stderr);
+    free(hooked);
+    free(json);
+    resolved_setup_free(&resolved);
+    error_list_free(&errors);
+    return path;
+}
+
+static int run_hooked(run_fixture *fixture, const char *personal, const char *const *answers, size_t count,
+                      ui **screen_out, error_list *errors) {
+    char *setup_file = hooked_setup_file();
+    ui *screen = ui_scripted_create(answers, count);
+    install_request request = { .setup_file = setup_file, .data_directory = INSTALL_FIXTURES "/data",
+                                .stick_root = "/run/stick", .personal_directory = personal,
+                                .target_root = fixture->target, .live_gpg_directory = "/nowhere",
+                                .screen = screen, .runner = &fixture->runner };
+    int exit_code = install_run(&request, errors);
+    *screen_out = screen;
+    free(setup_file);
+    return exit_code;
+}
+
+/** `choices.storage` as the target's firstboot bundle carries it; NULL when it is missing. */
+static document_node *saved_storage(const run_fixture *fixture) {
+    error_list errors;
+    error_list_init(&errors);
+    char *path = path_join(fixture->target, "var/lib/imprint/firstboot/setup.json");
+    char *json = NULL;
+    resolved_setup resolved;
+    resolved_setup_init(&resolved);
+    document_node *storage = NULL;
+    if (file_read_all(path, &json, &errors) && resolved_setup_from_json(json, path, &resolved, &errors) &&
+        resolved.choices != NULL && document_get(resolved.choices, "storage") != NULL) {
+        storage = document_clone(document_get(resolved.choices, "storage"));
+    }
+    error_list_print(&errors, stderr);
+    resolved_setup_free(&resolved);
+    free(json);
+    free(path);
+    error_list_free(&errors);
+    return storage;
+}
+
+static const char *saved_text(const document_node *storage, const char *key) {
+    const document_node *found = document_get(storage, key);
+    return found != NULL && found->kind == DOCUMENT_STRING ? found->string_value : "(missing)";
+}
+
+static char *personal_with_key(const char *name) {
+    char *personal = path_join(IMPRINT_TEST_WORK, name);
+    char *key = path_join(personal, "tailscale.key");
+    error_list errors;
+    error_list_init(&errors);
+    directory_make_all(personal, &errors);
+    file_write_text(key, "tskey-test\n", &errors);
+    error_list_free(&errors);
+    free(key);
+    return personal;
+}
+
+UTEST(install_storage, the_default_node_is_the_data_partition_at_50_saved_for_the_target) {
+    run_fixture fixture;
+    fixture_open(&fixture, "storage-default");
+    const char *const answers[] = { "5", "pw", "pw", "1", "nvme1n1" };
+    ui *screen = NULL;
+    error_list errors;
+    error_list_init(&errors);
+    ASSERT_EQ(IMPRINT_EXIT_OK, run_hooked(&fixture, NULL, answers, COUNT_OF(answers), &screen, &errors));
+    document_node *storage = saved_storage(&fixture);
+    ASSERT_TRUE(storage != NULL);
+    ASSERT_STREQ("data-disk", saved_text(storage, "node"));
+    ASSERT_STREQ("/data", saved_text(storage, "path"));
+    ASSERT_EQ(50LL, document_get(storage, "threshold")->integer_value);
+    ASSERT_FALSE(document_get(storage, "join")->boolean_value);
+    document_free(storage);
+    ui_destroy(screen);
+    error_list_free(&errors);
+    fixture_close(&fixture);
+}
+
+UTEST(install_storage, a_tailscale_key_on_the_stick_makes_join_the_default) {
+    run_fixture fixture;
+    fixture_open(&fixture, "storage-key");
+    char *personal = personal_with_key("storage-key-personal");
+    const char *const answers[] = { "5", "pw", "pw", "1", "nvme1n1" };
+    ui *screen = NULL;
+    error_list errors;
+    error_list_init(&errors);
+    ASSERT_EQ(IMPRINT_EXIT_OK, run_hooked(&fixture, personal, answers, COUNT_OF(answers), &screen, &errors));
+    document_node *storage = saved_storage(&fixture);
+    ASSERT_TRUE(storage != NULL);
+    ASSERT_TRUE(document_get(storage, "join")->boolean_value);
+    document_free(storage);
+    free(personal);
+    ui_destroy(screen);
+    error_list_free(&errors);
+    fixture_close(&fixture);
+}
+
+UTEST(install_storage, a_folder_and_threshold_0_only_once_confirmed) {
+    run_fixture fixture;
+    fixture_open(&fixture, "storage-folder");
+    const char *const answers[] = { "5", "pw", "pw", "11", "2", "srv", "11", "2", "/srv/storage",
+                                    "12", "0", "no", "12", "101", "12", "0", "yes", "13", "yes", "1", "nvme1n1" };
+    ui *screen = NULL;
+    error_list errors;
+    error_list_init(&errors);
+    ASSERT_EQ(IMPRINT_EXIT_OK, run_hooked(&fixture, NULL, answers, COUNT_OF(answers), &screen, &errors));
+    const char *transcript = ui_scripted_transcript(screen);
+    ASSERT_TRUE(strstr(transcript, "the folder is an absolute path below /, not 'srv'") != NULL);
+    ASSERT_TRUE(strstr(transcript, "the threshold was not changed") != NULL);
+    ASSERT_TRUE(strstr(transcript, "from 0 to 100, not '101'") != NULL);
+    ASSERT_TRUE(strstr(transcript, "no personal/tailscale.key on the stick") != NULL);
+    document_node *storage = saved_storage(&fixture);
+    ASSERT_TRUE(storage != NULL);
+    ASSERT_STREQ("folder", saved_text(storage, "node"));
+    ASSERT_STREQ("/srv/storage", saved_text(storage, "path"));
+    ASSERT_EQ(0LL, document_get(storage, "threshold")->integer_value);
+    ASSERT_TRUE(document_get(storage, "join")->boolean_value);
+    char *make = text_format("arch-chroot %s mkdir -p /srv/storage", fixture.target);
+    char *give = text_format("arch-chroot %s chown finn:finn /srv/storage", fixture.target);
+    ASSERT_TRUE(fake_runner_ran(&fixture.runner, make));
+    ASSERT_TRUE(fake_runner_ran(&fixture.runner, give));
+    free(make);
+    free(give);
+    document_free(storage);
+    ui_destroy(screen);
+    error_list_free(&errors);
+    fixture_close(&fixture);
+}
+
+UTEST(install_storage, none_saves_no_path_and_no_join) {
+    run_fixture fixture;
+    fixture_open(&fixture, "storage-none");
+    char *personal = personal_with_key("storage-none-personal");
+    const char *const answers[] = { "5", "pw", "pw", "11", "3", "13", "1", "nvme1n1" };
+    ui *screen = NULL;
+    error_list errors;
+    error_list_init(&errors);
+    ASSERT_EQ(IMPRINT_EXIT_OK, run_hooked(&fixture, personal, answers, COUNT_OF(answers), &screen, &errors));
+    ASSERT_TRUE(strstr(ui_scripted_transcript(screen), "choose a storage node first") != NULL);
+    document_node *storage = saved_storage(&fixture);
+    ASSERT_TRUE(storage != NULL);
+    ASSERT_STREQ("none", saved_text(storage, "node"));
+    ASSERT_TRUE(document_get(storage, "path") == NULL);
+    ASSERT_FALSE(document_get(storage, "join")->boolean_value);
+    document_free(storage);
+    free(personal);
+    ui_destroy(screen);
+    error_list_free(&errors);
+    fixture_close(&fixture);
+}

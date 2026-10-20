@@ -132,6 +132,33 @@ static bool confirm_target(install_session *session, error_list *errors) {
     return same;
 }
 
+static const char *data_mount_in_use(const install_options *options) {
+    return options->data_label != NULL ? options->data_mount : NULL;
+}
+
+/** @implNote The target's firstboot bundle carries setup_json, so the review's choices go into it there. */
+static void save_choices(install_session *session) {
+    resolved_setup *resolved = &session->resolved;
+    if (resolved->choices == NULL) {
+        resolved->choices = document_new_table(NULL, 0);
+    }
+    document_table_set(resolved->choices, "storage",
+                       storage_choice_to_document(&session->options.storage, data_mount_in_use(&session->options)));
+    free(session->setup_json);
+    session->setup_json = resolved_setup_to_json(resolved);
+}
+
+static void print_storage_plan(command_runner *runner, const install_options *options) {
+    const char *root = storage_choice_root(&options->storage, data_mount_in_use(options));
+    if (root == NULL) {
+        runner_say(runner, "storage node: none");
+        return;
+    }
+    runner_say(runner, "storage node: %s at %s, threshold %lld, join at first boot %s",
+               storage_node_name(options->storage.node), root, options->storage.threshold,
+               options->storage.join ? "yes" : "no");
+}
+
 static void print_plan(install_session *session) {
     command_runner *runner = session->request->runner;
     const install_options *options = &session->options;
@@ -142,6 +169,7 @@ static void print_plan(install_session *session) {
                options->timezone, options->locale);
     runner_say(runner, "bootloader %s, display manager %s", options->bootloader,
                install_options_have_display_manager(options) ? options->display_manager : "none");
+    print_storage_plan(runner, options);
     free(layout);
 }
 
@@ -168,6 +196,21 @@ static void give_data_partition_to_user(install_session *session, error_list *er
     const char *const give[] = { "chown", owner, options->data_mount, NULL };
     if (!target_run(session->request->runner, session->request->target_root, give, errors)) {
         runner_say(session->request->runner, "data: %s could not be handed to %s", options->data_mount, options->username);
+    }
+    free(owner);
+}
+
+static void give_storage_folder_to_user(install_session *session, error_list *errors) {
+    const install_options *options = &session->options;
+    if (options->storage.node != STORAGE_NODE_FOLDER) {
+        return;
+    }
+    char *owner = text_format("%s:%s", options->username, options->username);
+    const char *const make[] = { "mkdir", "-p", options->storage.folder_path, NULL };
+    const char *const give[] = { "chown", owner, options->storage.folder_path, NULL };
+    if (!target_run(session->request->runner, session->request->target_root, make, errors) ||
+        !target_run(session->request->runner, session->request->target_root, give, errors)) {
+        string_list_add(&session->problems, "the storage node's folder could not be made and handed to the user");
     }
     free(owner);
 }
@@ -238,6 +281,7 @@ static int write_disk(install_session *session, error_list *errors) {
         return IMPRINT_EXIT_ENVIRONMENT;
     }
     give_data_partition_to_user(session, errors);
+    give_storage_folder_to_user(session, errors);
     install_software(session, errors);
     if (!bootloader_install(session->request->runner, &session->options, session->request->target_root, errors)) {
         return IMPRINT_EXIT_ENVIRONMENT;
@@ -255,10 +299,12 @@ int install_run(const install_request *request, error_list *errors) {
         exit_code = IMPRINT_EXIT_ENVIRONMENT;
         if (disks_read(request->runner, &session.disks, errors)) {
             choose_default_disks(&session);
+            session.options.storage.tailscale_key_on_stick = storage_tailscale_key_present(session.stick.personal);
             exit_code = IMPRINT_EXIT_USAGE;
             if (!install_review(request->screen, &session.options, &session.disks, session.stick_disk)) {
                 error_push(errors, NULL, 0, "the install was cancelled: nothing was changed");
             } else if (confirm_target(&session, errors)) {
+                save_choices(&session);
                 exit_code = write_disk(&session, errors);
             }
         }

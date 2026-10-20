@@ -6,6 +6,7 @@ add_library(imprint_engine STATIC
     install/command_runner.c
     install/disks.c
     install/install_options.c
+    install/storage_choice.c
     install/layout.c
     install/offline.c
     install/base_system.c

@@ -23,6 +23,7 @@ set(IMPRINT_TEST_SOURCES
     fake_runner.c
     test_install_parts.c
     test_install_run.c
+    test_storage_choice.c
 )
 
 add_executable(imprint-tests ${IMPRINT_TEST_SOURCES})
