@@ -21,7 +21,7 @@ bool platform_is_file(const char *path) {
     return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY) == 0;
 }
 
-bool platform_list_files(const char *directory, string_list *names, error_list *errors) {
+static bool list_entries(const char *directory, bool want_directories, string_list *names, error_list *errors) {
     char *pattern = path_join(directory, "*");
     WIN32_FIND_DATAA found;
     HANDLE handle = FindFirstFileA(pattern, &found);
@@ -31,13 +31,69 @@ bool platform_list_files(const char *directory, string_list *names, error_list *
         return false;
     }
     do {
-        if (found.cFileName[0] != '.' && (found.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
+        bool is_directory = (found.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+        if (found.cFileName[0] != '.' && is_directory == want_directories) {
             string_list_add(names, found.cFileName);
         }
     } while (FindNextFileA(handle, &found));
     FindClose(handle);
     string_list_sort(names);
     return true;
+}
+
+bool platform_list_files(const char *directory, string_list *names, error_list *errors) {
+    return list_entries(directory, false, names, errors);
+}
+
+bool platform_list_directories(const char *directory, string_list *names, error_list *errors) {
+    return list_entries(directory, true, names, errors);
+}
+
+bool platform_make_directory(const char *path, error_list *errors) {
+    if (CreateDirectoryA(path, NULL) || (GetLastError() == ERROR_ALREADY_EXISTS && platform_is_directory(path))) {
+        return true;
+    }
+    error_push(errors, path, 0, "cannot create the directory: Windows error %lu", (unsigned long)GetLastError());
+    return false;
+}
+
+bool platform_set_mode(const char *path, unsigned int mode, error_list *errors) {
+    (void)path;
+    (void)mode;
+    (void)errors;
+    return true;
+}
+
+bool platform_make_symlink(const char *target, const char *link_path, error_list *errors) {
+    error_push(errors, link_path, 0, "cannot link to %s: writing a Linux root needs Linux", target);
+    return false;
+}
+
+char *platform_absolute_path(const char *path, error_list *errors) {
+    char *resolved = _fullpath(NULL, path, 0);
+    if (resolved == NULL || !(platform_is_file(resolved) || platform_is_directory(resolved))) {
+        error_push(errors, path, 0, "cannot resolve the path: it does not exist");
+        free(resolved);
+        return NULL;
+    }
+    char *copy = text_duplicate(resolved);
+    free(resolved);
+    return copy;
+}
+
+char *platform_temporary_path(error_list *errors) {
+    char directory[MAX_PATH + 1];
+    char path[MAX_PATH + 1];
+    DWORD length = GetTempPathA(sizeof directory, directory);
+    if (length == 0 || length > sizeof directory || GetTempFileNameA(directory, "imp", 0, path) == 0) {
+        error_push(errors, NULL, 0, "cannot create a temporary file: Windows error %lu", (unsigned long)GetLastError());
+        return NULL;
+    }
+    return text_duplicate(path);
+}
+
+void platform_set_environment(const char *name, const char *value) {
+    _putenv_s(name, value);
 }
 
 /**
@@ -95,10 +151,10 @@ static char *command_line(const char *const *arguments, error_list *errors) {
 }
 
 /** @implNote cmd /c drops the first and the last quote of a line that starts with one, so the whole line is wrapped once more. */
-int platform_run_capture(const char *const *arguments, char **output, error_list *errors) {
+static FILE *open_pipe(const char *const *arguments, error_list *errors) {
     char *line = command_line(arguments, errors);
     if (line == NULL) {
-        return -1;
+        return NULL;
     }
     char *wrapped = text_format("\"%s 2>&1\"", line);
     free(line);
@@ -106,20 +162,48 @@ int platform_run_capture(const char *const *arguments, char **output, error_list
     free(wrapped);
     if (pipe == NULL) {
         error_push(errors, NULL, 0, "cannot start %s", arguments[0]);
+    }
+    return pipe;
+}
+
+static int exit_status(int status, const char *program, error_list *errors) {
+    if (status == -1) {
+        error_push(errors, NULL, 0, "cannot wait for %s", program);
+    }
+    return status;
+}
+
+int platform_run_capture(const char *const *arguments, char **output, error_list *errors) {
+    FILE *pipe = open_pipe(arguments, errors);
+    if (pipe == NULL) {
         return -1;
     }
     char *captured = platform_read_stream(pipe);
-    int status = _pclose(pipe);
+    int status = exit_status(_pclose(pipe), arguments[0], errors);
     if (captured == NULL) {
         error_push(errors, NULL, 0, "cannot read the output of %s", arguments[0]);
         return -1;
     }
     if (status == -1) {
         free(captured);
-        error_push(errors, NULL, 0, "cannot wait for %s", arguments[0]);
         return -1;
     }
     *output = captured;
+    return status;
+}
+
+int platform_run_streaming(const char *const *arguments, FILE *output, error_list *errors) {
+    fflush(output);
+    FILE *pipe = open_pipe(arguments, errors);
+    if (pipe == NULL) {
+        return -1;
+    }
+    bool copied = platform_copy_stream(pipe, output);
+    int status = exit_status(_pclose(pipe), arguments[0], errors);
+    if (!copied) {
+        error_push(errors, NULL, 0, "cannot pass on the output of %s", arguments[0]);
+        return -1;
+    }
     return status;
 }
 

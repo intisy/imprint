@@ -1,0 +1,21 @@
+{
+  "format": 1,
+  "name": "hooked",
+  "distro": "arch",
+  "package_manager": "pacman",
+  "bootloader": "grub",
+  "window_managers": [],
+  "apps": ["git"],
+  "packages": ["git"],
+  "aur": [],
+  "flatpak": [],
+  "repo_setup": [],
+  "services": [],
+  "user_services": [],
+  "skipped": [],
+  "setup": {
+    "distro": "arch",
+    "apps": ["git"],
+    "hooks": [{ "stage": "firstboot", "script": "hooks/first.sh" }, { "stage": "build", "script": "hooks/build.sh" }, { "stage": "firstboot", "script": "hooks/second.sh" }]
+  }
+}

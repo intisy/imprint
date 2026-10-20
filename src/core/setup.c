@@ -1,5 +1,6 @@
 #include "setup.h"
 
+#include "hook.h"
 #include "identifier.h"
 #include "platform.h"
 #include "setup_merge.h"
@@ -12,7 +13,7 @@ static const char *const SETUP_KEYS[] = {
     "extends", "remove", "distro", "window_managers", "apps", "notes", "bootloader", "display_manager", "disk",
     "install", "user_services", "host_files", "persistence_size_mb", "extra_packages", "extra_aur",
     "extra_services", "flatpaks", "aur_helper", "cursor_extensions", "app_config", "users", "root", "system",
-    "console", "remote",
+    "console", "remote", "hooks",
 };
 
 static char *setups_directory(const char *data_directory) {
@@ -181,6 +182,7 @@ static document_node *load_chain(const char *data_directory, const char *name, c
     string_list_add(chain, name);
     const char *extends = NULL;
     bool valid = check_own_keys(own, errors);
+    valid = hooks_check_own(own, data_directory, errors) && valid;
     valid = read_extends(own, &extends, errors) && valid;
     document_node *merged = NULL;
     if (valid && extends == NULL) {

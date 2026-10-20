@@ -2,6 +2,7 @@
 
 #include "catalog.h"
 #include "exit_codes.h"
+#include "hook.h"
 #include "identifier.h"
 #include "platform.h"
 #include "resolve.h"
@@ -47,6 +48,25 @@ static void print_list(FILE *output, const char *label, const string_list *value
     free(joined);
 }
 
+/** @implNote setup_load has already checked every hook, so reading them again cannot fail. */
+static void print_hooks(const resolved_setup *resolved, FILE *output) {
+    hook_list hooks;
+    error_list ignored;
+    error_list_init(&ignored);
+    hooks_read(resolved->setup, &hooks, &ignored);
+    string_list described;
+    string_list_init(&described);
+    for (size_t index = 0; index < hooks.count; index++) {
+        char *entry = text_format("%s %s", hook_stage_name(hooks.items[index].stage), hooks.items[index].script);
+        string_list_add(&described, entry);
+        free(entry);
+    }
+    print_list(output, "hooks", &described);
+    string_list_free(&described);
+    hook_list_free(&hooks);
+    error_list_free(&ignored);
+}
+
 static void print_summary(const setup *loaded, const resolved_setup *resolved, FILE *output) {
     if (loaded->chain.count > 1) {
         char *chain = string_list_join(&loaded->chain, " -> ");
@@ -66,6 +86,7 @@ static void print_summary(const setup *loaded, const resolved_setup *resolved, F
     print_list(output, "flatpak", &resolved->flatpak);
     print_list(output, "services", &resolved->services);
     print_list(output, "user services", &resolved->user_services);
+    print_hooks(resolved, output);
     if (resolved->skipped.count > 0) {
         char *label = text_format("skipped, no recipe for %s", resolved->distro);
         print_list(output, label, &resolved->skipped);

@@ -1,6 +1,7 @@
 #include "engine.h"
 
 #include "document.h"
+#include "engine_hooks.h"
 #include "exit_codes.h"
 #include "plan.h"
 #include "resolve.h"
@@ -8,9 +9,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-static const char ENGINE_USAGE[] =
+const char ENGINE_USAGE[] =
     "usage: imprint-engine plan <resolved-setup.json>\n"
-    "       imprint-engine --version\n";
+    "       imprint-engine hooks run <stage> <resolved-setup.json> --data DIR [--personal DIR]\n"
+    "       imprint-engine hooks install-firstboot <resolved-setup.json> --data DIR --target DIR [--personal DIR]\n"
+    "       imprint-engine --version\n"
+    "\n"
+    "A stage is one of build, install, firstboot, session. DIR after --data is the data repo the hook scripts\n"
+    "live in; after --target, the root of the installed system.\n";
 
 static int plan_file(const char *path, FILE *output, FILE *error_output) {
     error_list errors;
@@ -37,6 +43,9 @@ int engine_run(int argument_count, const char *const *arguments, FILE *output, F
     if (argument_count == 2 && strcmp(arguments[1], "--version") == 0) {
         fprintf(output, "imprint-engine %s\n", IMPRINT_VERSION);
         return IMPRINT_EXIT_OK;
+    }
+    if (argument_count >= 2 && strcmp(arguments[1], "hooks") == 0) {
+        return engine_hooks_run(argument_count, arguments, output, error_output);
     }
     if (argument_count != 3 || strcmp(arguments[1], "plan") != 0) {
         fputs(ENGINE_USAGE, error_output);

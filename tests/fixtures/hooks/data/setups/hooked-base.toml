@@ -1,0 +1,10 @@
+distro = "arch"
+apps = ["git"]
+
+[[hooks]]
+stage = "firstboot"
+script = "hooks/first.sh"
+
+[[hooks]]
+stage = "build"
+script = "hooks/build.sh"
