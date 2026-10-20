@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum { RESOLVED_SETUP_FORMAT = 1 };
+enum { RESOLVED_SETUP_FORMAT = 2 };
 
 static const char *const DEFAULT_BOOTLOADER = "grub";
 
@@ -73,6 +73,24 @@ void resolved_setup_init(resolved_setup *resolved) {
     }
 }
 
+static void dotfiles_add(dotfile_list *dotfiles, const char *source, const char *target) {
+    if (dotfiles->count == dotfiles->capacity) {
+        dotfiles->capacity = dotfiles->capacity == 0 ? 4 : dotfiles->capacity * 2;
+        dotfiles->items = memory_reallocate(dotfiles->items, dotfiles->capacity * sizeof *dotfiles->items);
+    }
+    dotfiles->items[dotfiles->count].source = text_duplicate(source);
+    dotfiles->items[dotfiles->count].target = text_duplicate(target);
+    dotfiles->count++;
+}
+
+static void dotfiles_free(dotfile_list *dotfiles) {
+    for (size_t index = 0; index < dotfiles->count; index++) {
+        free(dotfiles->items[index].source);
+        free(dotfiles->items[index].target);
+    }
+    free(dotfiles->items);
+}
+
 void resolved_setup_free(resolved_setup *resolved) {
     for (size_t index = 0; index < COUNT_OF(TEXT_FIELDS); index++) {
         free(*text_at(resolved, &TEXT_FIELDS[index]));
@@ -80,6 +98,7 @@ void resolved_setup_free(resolved_setup *resolved) {
     for (size_t index = 0; index < COUNT_OF(LIST_FIELDS); index++) {
         string_list_free(list_at(resolved, &LIST_FIELDS[index]));
     }
+    dotfiles_free(&resolved->dotfiles);
     document_free(resolved->setup);
     resolved_setup_init(resolved);
 }
@@ -173,6 +192,19 @@ static bool take_app(const setup *loaded, const catalog *available, const docume
     return true;
 }
 
+/** @implNote catalog_validate has already checked that config_files is a table of strings. */
+static bool add_window_manager_dotfiles(const document_node *window_manager, dotfile_list *dotfiles) {
+    const document_node *directory = document_get(window_manager, "dotfiles_directory");
+    const document_node *files = document_get(window_manager, "config_files");
+    for (size_t index = 0; directory != NULL && files != NULL && index < files->child_count; index++) {
+        const document_node *file = files->children[index];
+        char *source = text_format("dotfiles/%s/%s", directory->string_value, file->string_value);
+        dotfiles_add(dotfiles, source, file->key);
+        free(source);
+    }
+    return true;
+}
+
 static bool take_window_manager(const setup *loaded, const catalog *available, const document_node *item,
                                 resolved_setup *resolved, error_list *errors) {
     const catalog_entry *entry = catalog_find(&available->window_managers, item->string_value);
@@ -181,7 +213,8 @@ static bool take_window_manager(const setup *loaded, const catalog *available, c
         return false;
     }
     string_list_add_unique(&resolved->window_managers, item->string_value);
-    return add_unique_from(entry->node, "required_apps", &resolved->apps, errors);
+    return add_unique_from(entry->node, "required_apps", &resolved->apps, errors) &&
+           add_window_manager_dotfiles(entry->node, &resolved->dotfiles);
 }
 
 static bool resolve_bootloader(const setup *loaded, const catalog *available, resolved_setup *resolved,
@@ -261,6 +294,14 @@ char *resolved_setup_to_json(const resolved_setup *resolved) {
         }
         document_table_set(root, LIST_FIELDS[index].key, array);
     }
+    document_node *dotfiles = document_new_array(NULL, 0);
+    for (size_t index = 0; index < resolved->dotfiles.count; index++) {
+        document_node *pair = document_new_table(NULL, 0);
+        document_table_set(pair, "source", document_new_string(resolved->dotfiles.items[index].source, NULL, 0));
+        document_table_set(pair, "target", document_new_string(resolved->dotfiles.items[index].target, NULL, 0));
+        document_array_append(dotfiles, pair);
+    }
+    document_table_set(root, "dotfiles", dotfiles);
     document_table_set(root, "setup", resolved->setup == NULL ? document_new_table(NULL, 0) : document_clone(resolved->setup));
     char *json = document_to_json(root);
     document_free(root);
@@ -286,7 +327,7 @@ static bool read_format(const document_node *root, error_list *errors) {
 }
 
 static bool is_resolved_key(const char *key) {
-    if (strcmp(key, "format") == 0 || strcmp(key, "setup") == 0) {
+    if (strcmp(key, "format") == 0 || strcmp(key, "setup") == 0 || strcmp(key, "dotfiles") == 0) {
         return true;
     }
     for (size_t index = 0; index < COUNT_OF(TEXT_FIELDS); index++) {
@@ -321,6 +362,32 @@ static bool require_list(const document_node *root, const field_offset *field, s
     return document_string_list(root, field->key, values, errors);
 }
 
+static bool read_dotfiles(const document_node *root, dotfile_list *dotfiles, error_list *errors) {
+    const document_node *list = document_get(root, "dotfiles");
+    if (list == NULL || list->kind != DOCUMENT_ARRAY) {
+        document_error(errors, list == NULL ? root : list, "missing required key 'dotfiles', an array");
+        return false;
+    }
+    bool valid = true;
+    for (size_t index = 0; index < list->child_count; index++) {
+        const char *source = NULL;
+        const char *target = NULL;
+        const document_node *pair = list->children[index];
+        if (pair->kind != DOCUMENT_TABLE) {
+            document_error(errors, pair, "a dotfile is an object with 'source' and 'target'");
+            valid = false;
+            continue;
+        }
+        bool complete = document_require_string(pair, "source", &source, errors);
+        complete = document_require_string(pair, "target", &target, errors) && complete;
+        if (complete) {
+            dotfiles_add(dotfiles, source, target);
+        }
+        valid = complete && valid;
+    }
+    return valid;
+}
+
 bool resolved_setup_from_json(const char *text, const char *file, resolved_setup *resolved, error_list *errors) {
     resolved_setup_init(resolved);
     document_node *root = document_parse_json(text, file, errors);
@@ -344,6 +411,7 @@ bool resolved_setup_from_json(const char *text, const char *file, resolved_setup
     for (size_t index = 0; valid && index < COUNT_OF(LIST_FIELDS); index++) {
         valid = require_list(root, &LIST_FIELDS[index], list_at(resolved, &LIST_FIELDS[index]), errors);
     }
+    valid = valid && read_dotfiles(root, &resolved->dotfiles, errors);
     const document_node *setup_table = NULL;
     if (valid && document_optional_table(root, "setup", &setup_table, errors) && setup_table != NULL) {
         resolved->setup = document_clone(setup_table);

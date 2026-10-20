@@ -153,7 +153,7 @@ UTEST(cli, setup_show_json_is_what_the_engine_reads) {
     error_list_init(&errors);
     document_node *parsed = document_parse_json(result.output, "output", &errors);
     ASSERT_TRUE(parsed != NULL);
-    ASSERT_EQ(1LL, document_get(parsed, "format")->integer_value);
+    ASSERT_EQ(2LL, document_get(parsed, "format")->integer_value);
     ASSERT_STREQ("workstation", document_get(parsed, "name")->string_value);
     document_free(parsed);
     cli_result_free(&result);
