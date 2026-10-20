@@ -106,6 +106,17 @@ static bool scripted_text(ui *self, const char *prompt, const char *default_valu
     return true;
 }
 
+static bool scripted_secret(ui *self, const char *prompt, char **answer) {
+    scripted_state *state = state_of(self);
+    record(state, "secret", prompt);
+    const char *given = next_answer(state);
+    if (given == NULL) {
+        return false;
+    }
+    *answer = text_duplicate(given);
+    return true;
+}
+
 static bool scripted_confirm(ui *self, const char *question, bool default_answer, bool *answer) {
     (void)default_answer;
     scripted_state *state = state_of(self);
@@ -147,6 +158,7 @@ static const ui_operations SCRIPTED_OPERATIONS = {
     .choose_one = scripted_choose_one,
     .choose_many = scripted_choose_many,
     .text = scripted_text,
+    .secret = scripted_secret,
     .confirm = scripted_confirm,
     .progress = scripted_progress,
     .log = scripted_log,

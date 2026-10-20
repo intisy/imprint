@@ -83,8 +83,8 @@ static void edit_text(ui *screen, const char *prompt, char **field) {
 static void edit_password(ui *screen, install_options *options) {
     char *first = NULL;
     char *second = NULL;
-    bool typed = ui_text(screen, "new password for the user", NULL, &first) && first != NULL && first[0] != '\0' &&
-                 ui_text(screen, "the same password again", NULL, &second) && second != NULL;
+    bool typed = ui_secret(screen, "new password for the user", &first) && first != NULL && first[0] != '\0' &&
+                 ui_secret(screen, "the same password again", &second) && second != NULL;
     if (typed && strcmp(first, second) == 0) {
         install_options_replace(&options->password, first);
         install_options_replace(&options->password_hash, NULL);
