@@ -1,0 +1,33 @@
+{
+  "format": 2,
+  "name": "workstation",
+  "distro": "arch",
+  "package_manager": "pacman",
+  "bootloader": "grub",
+  "window_managers": ["i3"],
+  "apps": ["git", "i3"],
+  "packages": ["git", "i3-wm", "flatpak"],
+  "aur": ["in-repository-bin", "only-in-aur"],
+  "flatpak": ["org.example.App"],
+  "repo_setup": ["printf '[multilib]\\nInclude = /etc/pacman.d/mirrorlist\\n' >> /etc/pacman.conf"],
+  "services": ["sshd"],
+  "user_services": ["syncthing.service"],
+  "skipped": [],
+  "dotfiles": [{ "source": "dotfiles/i3/config", "target": ".config/i3/config" }],
+  "setup": {
+    "distro": "arch",
+    "display_manager": "lightdm",
+    "notes": ["fixture notes"],
+    "disk": {
+      "esp_size_mb": 1024, "swap_size_mb": 16384, "root_size_mb": 262144, "root_fs": "ext4",
+      "data_partition": { "label": "data", "mount_point": "/data", "filesystem": "ext4" }
+    },
+    "install": {
+      "hostname": "workstation", "timezone": "Europe/Berlin", "locale": "en_US.UTF-8", "username": "finn",
+      "expire_password": true
+    },
+    "system": { "keyboard_layout": "de", "user_groups": ["docker"] },
+    "remote": { "ssh_authorized_keys": ["ssh-ed25519 AAAAfixture test"] },
+    "users": [{ "name": "finn", "sudo": true, "shell": "/bin/bash" }]
+  }
+}

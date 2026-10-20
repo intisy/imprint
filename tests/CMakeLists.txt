@@ -20,6 +20,9 @@ set(IMPRINT_TEST_SOURCES
     test_hook.c
     test_firstboot.c
     test_hook_cli.c
+    fake_runner.c
+    test_install_parts.c
+    test_install_run.c
 )
 
 add_executable(imprint-tests ${IMPRINT_TEST_SOURCES})
